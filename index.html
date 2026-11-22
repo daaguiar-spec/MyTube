@@ -213,13 +213,13 @@ $('cImp').onclick=()=>{
   try{
     let t=$('cCode').value;const k=t.lastIndexOf('MT1:');if(k>=0)t=t.slice(k+4);
     t=t.replace(/-/g,'+').replace(/_/g,'/').replace(/[^A-Za-z0-9+\/]/g,'');while(t.length%4)t+='=';
-    const c=JSON.parse(decodeURIComponent(escape(atob(t))));
+    const bin=atob(t);const c=JSON.parse(new TextDecoder().decode(Uint8Array.from(bin,ch=>ch.charCodeAt(0))));
     if(typeof c.cats!=='string')throw 0;
     cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,pin:c.pin||''};
     save('mt_cfg',cfg);feed={};save('mt_feed',feed);
     $('cMsg').textContent='Configuração aplicada!';
     openCfg();openCat(0,true);
-  }catch(e){$('cMsg').textContent='Código inválido. Confira se copiou tudo, do começo (MT1:) ao fim.'}
+  }catch(e){const v=$('cCode').value;$('cMsg').textContent='Código inválido ('+(e&&e.message||'formato')+'; '+v.length+' caracteres; começa com “'+v.trim().slice(0,6)+'”). Confira se copiou tudo, do começo (MT1:) ao fim.'}
 };
 openCat(0);
 }

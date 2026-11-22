@@ -211,7 +211,7 @@ $('cExp').onclick=async()=>{
 };
 $('cImp').onclick=()=>{
   try{
-    let t=$('cCode').value;const k=t.lastIndexOf('MT1:');if(k>=0)t=t.slice(k+4);
+    let t=$('cCode').value;const k=t.toUpperCase().lastIndexOf('MT1:');if(k>=0)t=t.slice(k+4);
     t=t.replace(/-/g,'+').replace(/_/g,'/').replace(/[^A-Za-z0-9+\/]/g,'');while(t.length%4)t+='=';
     const bin=atob(t);const c=JSON.parse(new TextDecoder().decode(Uint8Array.from(bin,ch=>ch.charCodeAt(0))));
     if(typeof c.cats!=='string')throw 0;

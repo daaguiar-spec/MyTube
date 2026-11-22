@@ -1,6 +1,6 @@
 {
-  "name": "MyTube",
-  "short_name": "MyTube",
+  "name": "SixSeven Tube",
+  "short_name": "SixSeven",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

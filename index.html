@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="SixSeven Tube">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261122170603">
+<meta name="mt-build" content="20261122172504">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -122,7 +122,9 @@ header h1{margin-right:auto;order:1}
 
 <div class="ov" id="pin"><div class="panel" style="max-width:380px;margin-top:10vh">
   <h2 style="margin-top:0" id="pinT">Área dos pais</h2>
-  <input id="pinIn" type="password" inputmode="numeric" placeholder="PIN">
+  <p class="hint" id="pinH"></p>
+  <input id="pinIn" type="password" inputmode="numeric" autocomplete="off" placeholder="PIN" style="width:100%;font:inherit;font-size:20px;letter-spacing:6px;padding:10px 12px;border-radius:10px;border:1px solid #33496b;background:#0f1b2d;color:var(--ink);margin-top:8px">
+  <input id="pinIn2" type="password" inputmode="numeric" autocomplete="off" placeholder="Repita o PIN" style="width:100%;font:inherit;font-size:20px;letter-spacing:6px;padding:10px 12px;border-radius:10px;border:1px solid #33496b;background:#0f1b2d;color:var(--ink);margin-top:8px">
   <p class="hint" id="pinErr"></p>
   <div class="row"><button class="pri" id="pinOk">Entrar</button><button id="pinX">Cancelar</button></div>
 </div></div>
@@ -161,7 +163,8 @@ header h1{margin-right:auto;order:1}
   <label class="chk"><input type="checkbox" id="cOpen"> Permitir busca em todo o YouTube (SafeSearch estrito)</label>
   <p class="hint">Desligado: a busca só procura nos canais aprovados.</p>
   <label for="cPin">PIN dos pais</label>
-  <input id="cPin" type="password" inputmode="numeric">
+  <input id="cPin" type="password" inputmode="numeric" autocomplete="off" placeholder="Deixe em branco para manter o atual">
+  <p class="hint">Para trocar, digite um novo PIN de 4 a 8 números.</p>
   <div class="row"><button class="pri" id="cSave">Salvar</button><button id="cX">Fechar</button></div>
   <label>Histórico</label>
   <div class="hist" id="cHist"></div>
@@ -344,12 +347,17 @@ function renderHist(){
 }
 function openCfg(){
   $('cMin').value=String(minD());$('cMax').value=String(maxD());$('cLim').value=String(lim());renderHist();
-  $('cKey').value=cfg.key;$('cCats').value=cfg.cats;$('cWords').value=cfg.words;$('cBch').value=cfg.bch;$('cOpen').checked=cfg.open;$('cPin').value=cfg.pin;
+  $('cKey').value=cfg.key;$('cCats').value=cfg.cats;$('cWords').value=cfg.words;$('cBch').value=cfg.bch;$('cOpen').checked=cfg.open;$('cPin').value='';
   $('cfg').classList.add('show');refreshCats();
 }
+const validPin=p=>/^\d{4,8}$/.test(p);
+function lockInfo(){const l=load('mt_pinlock',{n:0,until:0});return l}
 function askPin(){
-  if(!cfg.pin){parent=true;openCfg();return}
-  $('pinIn').value='';$('pinErr').textContent='';$('pin').classList.add('show');$('pinIn').focus();
+  const creating=!validPin(cfg.pin||'');
+  $('pinT').textContent=creating?'Crie o PIN dos pais':'Área dos pais';
+  $('pinH').textContent=creating?'Escolha um PIN de 4 a 8 números. Não conte para seu filho: sem ele, ninguém entra nas configurações.':'Digite o PIN para entrar.';
+  $('pinIn2').style.display=creating?'':'none';
+  $('pinIn').value='';$('pinIn2').value='';$('pinErr').textContent='';$('pin').classList.add('show');$('pinIn').focus();
 }
 
 $('bnav').addEventListener('click',e=>{const b=e.target.closest('button');if(b){openCat(+b.dataset.v);scrollTo(0,0)}});
@@ -367,13 +375,25 @@ $('bBloq').onclick=()=>{if(!playing)return;cfg.bch=(cfg.bch+' '+playing.chId).tr
 $('bPais').onclick=askPin;$('lockP').onclick=askPin;
 $('cHistClr').onclick=()=>{hist=[];save('mt_hist',hist);renderHist()};
 $('pinX').onclick=()=>$('pin').classList.remove('show');
-$('pinOk').onclick=()=>{if($('pinIn').value===cfg.pin){parent=true;$('pin').classList.remove('show');openCfg()}else $('pinErr').textContent='PIN incorreto.'};
-$('pinIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinOk').click()});
-$('cX').onclick=()=>{$('cfg').classList.remove('show')};
+$('pinOk').onclick=()=>{
+  const a=$('pinIn').value.trim();
+  if(!validPin(cfg.pin||'')){
+    if(!validPin(a)){$('pinErr').textContent='Use de 4 a 8 números.';return}
+    if(a!==$('pinIn2').value.trim()){$('pinErr').textContent='Os dois PINs não são iguais.';return}
+    cfg.pin=a;save('mt_cfg',cfg);parent=true;$('pin').classList.remove('show');openCfg();return;
+  }
+  const l=lockInfo();
+  if(l.until>Date.now()){$('pinErr').textContent='Muitas tentativas. Tente de novo em '+Math.ceil((l.until-Date.now())/60000)+' min.';return}
+  if(a===cfg.pin){save('mt_pinlock',{n:0,until:0});parent=true;$('pin').classList.remove('show');openCfg()}
+  else{l.n++;if(l.n>=5){l.until=Date.now()+5*60000;l.n=0}save('mt_pinlock',l);
+    $('pinErr').textContent=l.until>Date.now()?'Muitas tentativas. Bloqueado por 5 minutos.':'PIN incorreto.'}
+};
+$('pinIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinOk').click()});$('pinIn2').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinOk').click()});
+$('cX').onclick=()=>{$('cfg').classList.remove('show');parent=false};
 $('cSave').onclick=()=>{
-  cfg={key:$('cKey').value.trim(),cats:$('cCats').value,words:$('cWords').value,bch:$('cBch').value.trim(),open:$('cOpen').checked,pin:$('cPin').value.trim(),minDur:+$('cMin').value,maxDur:+$('cMax').value,limit:+$('cLim').value};
+  cfg={key:$('cKey').value.trim(),cats:$('cCats').value,words:$('cWords').value,bch:$('cBch').value.trim(),open:$('cOpen').checked,pin:(validPin($('cPin').value.trim())?$('cPin').value.trim():cfg.pin),minDur:+$('cMin').value,maxDur:+$('cMax').value,limit:+$('cLim').value};
   save('mt_cfg',cfg);if(!timeUp())$('lock').classList.remove('show');
-  $('cfg').classList.remove('show');openCat(-1,true);
+  $('cfg').classList.remove('show');parent=false;openCat(-1,true);
 };
 $('cExp').onclick=async()=>{
   const code='MT1:'+btoa(unescape(encodeURIComponent(JSON.stringify(cfg))));
@@ -387,7 +407,7 @@ $('cImp').onclick=()=>{
     t=t.replace(/-/g,'+').replace(/_/g,'/').replace(/[^A-Za-z0-9+\/]/g,'');while(t.length%4)t+='=';
     const bin=atob(t);const c=JSON.parse(new TextDecoder().decode(Uint8Array.from(bin,ch=>ch.charCodeAt(0))));
     if(typeof c.cats!=='string')throw 0;
-    cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,pin:c.pin||'',minDur:c.minDur??181,maxDur:c.maxDur??0,limit:c.limit??0};
+    cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,pin:validPin(c.pin||'')?c.pin:cfg.pin,minDur:c.minDur??181,maxDur:c.maxDur??0,limit:c.limit??0};
     save('mt_cfg',cfg);feed={};save('mt_feed2',feed);
     $('cMsg').textContent='Configuração aplicada!';
     openCfg();openCat(-1,true);

@@ -78,7 +78,7 @@ textarea{min-height:110px}.hint{color:var(--mut);font-size:14px;margin:4px 0 0}
   <div class="row"><button class="pri" id="cSave">Salvar</button><button id="cX">Fechar</button></div>
   <label for="cCode">Levar para outro aparelho</label>
   <p class="hint">Toque em “Copiar configuração”, envie o código para o outro aparelho (por WhatsApp, por exemplo), cole aqui e toque em “Aplicar código”. O código contém a chave e o PIN: envie só para você mesmo.</p>
-  <textarea id="cCode" style="min-height:70px" placeholder="Cole o código aqui"></textarea>
+  <textarea id="cCode" autocapitalize="off" autocorrect="off" spellcheck="false" style="min-height:70px" placeholder="Cole o código aqui"></textarea>
   <p class="hint" id="cMsg"></p>
   <div class="row"><button id="cExp">Copiar configuração</button><button id="cImp">Aplicar código</button></div>
 </div></div>
@@ -211,14 +211,15 @@ $('cExp').onclick=async()=>{
 };
 $('cImp').onclick=()=>{
   try{
-    const t=$('cCode').value.trim().replace(/^MT1:/,'');
+    let t=$('cCode').value;const k=t.lastIndexOf('MT1:');if(k>=0)t=t.slice(k+4);
+    t=t.replace(/-/g,'+').replace(/_/g,'/').replace(/[^A-Za-z0-9+\/]/g,'');while(t.length%4)t+='=';
     const c=JSON.parse(decodeURIComponent(escape(atob(t))));
     if(typeof c.cats!=='string')throw 0;
     cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,pin:c.pin||''};
     save('mt_cfg',cfg);feed={};save('mt_feed',feed);
     $('cMsg').textContent='Configuração aplicada!';
     openCfg();openCat(0,true);
-  }catch(e){$('cMsg').textContent='Código inválido. Confira se copiou tudo.'}
+  }catch(e){$('cMsg').textContent='Código inválido. Confira se copiou tudo, do começo (MT1:) ao fim.'}
 };
 openCat(0);
 }

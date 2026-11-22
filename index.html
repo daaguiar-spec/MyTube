@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="MyTube">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
+<meta name="mt-build" content="20261122155118">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
@@ -433,6 +434,13 @@ $('fRes').addEventListener('click',e=>{
       try{sessionStorage.setItem('mt_cur',cur)}catch(e){}setTimeout(()=>location.reload(),150)}
     else ptr.style.height='0';y0=null});
 }
+try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js')}catch(e){}
+{const mine=(document.querySelector('meta[name=mt-build]')||{}).content;
+  const check=async()=>{try{const t=await (await fetch('./?v='+Date.now(),{cache:'no-store'})).text();
+    const m=t.match(/mt-build" content="([^"]+)"/);
+    if(m&&m[1]!==mine&&!document.querySelector('.ov.show')){try{sessionStorage.setItem('mt_cur',cur)}catch(e){}location.reload()}}catch(e){}};
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')check()});
+  setTimeout(check,3000);}
 let sc=-1;try{const v=sessionStorage.getItem('mt_cur');if(v!==null)sc=+v;sessionStorage.removeItem('mt_cur')}catch(e){}
 openCat(sc<cats().length?sc:-1);
 }

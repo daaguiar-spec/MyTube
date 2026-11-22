@@ -50,7 +50,7 @@ header{position:sticky;padding-top:max(14px,env(safe-area-inset-top))}
 .panel select{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid #33496b;background:#0f1b2d;color:var(--ink)}
 .hist{max-height:320px;overflow:auto;margin-top:8px}.hist div{padding:8px 0;border-top:1px solid #22344f;font-size:14px}.hist small{color:var(--mut);display:block}
 #lock .panel{text-align:center;margin-top:12vh;max-width:420px}#lock h2{font-size:28px;margin:8px 0}
-#bPais.mini{position:absolute;top:20px;right:max(4vw,14px);min-height:24px;padding:0 10px;font-size:11px;font-weight:700;background:transparent;border:1px solid #33496b;color:var(--mut)}
+#bPais.mini{position:absolute;top:calc(max(14px,env(safe-area-inset-top)) + 6px);right:max(4vw,14px);min-height:24px;padding:0 10px;font-size:11px;font-weight:700;background:transparent;border:1px solid #33496b;color:var(--mut)}
 header h1{margin-right:auto}
 @media(min-width:601px){#q{margin-right:110px}}
 </style>
@@ -215,7 +215,7 @@ function tabs(){
 async function openCat(i,force){
   cur=i;tabs();msg('');$('q').value='';
   const c=cats()[i];
-  if(!cfg.key){show([],'Peça para um responsável configurar o app em “Pais”.');return}
+  if(!cfg.key){show([],'Peça para um responsável configurar o app em “Filtro Pais”.');return}
   if(!c){show([],'Nenhuma categoria criada ainda.');return}
   $('grid').innerHTML='<p style="color:var(--mut)">Carregando…</p>';
   show(await loadCat(c,force));

@@ -46,6 +46,8 @@ textarea{min-height:110px}.hint{color:var(--mut);font-size:14px;margin:4px 0 0}
 .ch img{width:48px;height:48px;border-radius:50%;flex:none;background:#22344f}
 .ch div{flex:1}.ch strong{display:block;line-height:1.3}.ch small{color:var(--mut);display:block;max-height:2.8em;overflow:hidden}
 .ch button.added{background:#2f6f4f;color:#fff}
+#cAppr .chips button{background:#2a3d5c;font-size:14px;min-height:36px}#cAppr .chips button::after{content:" ✕";color:var(--red)}
+#cAppr>div{margin:4px 0 8px}
 header{position:sticky;padding-top:calc(env(safe-area-inset-top) + 14px)}
 .panel select{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid #33496b;background:#0f1b2d;color:var(--ink)}
 .hist{max-height:320px;overflow:auto;margin-top:8px}.hist div{padding:8px 0;border-top:1px solid #22344f;font-size:14px}.hist small{color:var(--mut);display:block}
@@ -93,6 +95,7 @@ header h1{margin-right:auto;order:1}
   <input id="cKey" placeholder="AIza…">
   <p class="hint">Gratuita, criada no Google Cloud (YouTube Data API v3).</p>
   <label for="cCats">Categorias e canais aprovados</label>
+  <div id="cAppr"></div>
   <textarea id="cCats"></textarea>
   <p class="hint">Uma categoria por linha: <b>Nome: @canal1, @canal2</b>. Aceita @nome, ID (UC…) ou link do canal. Os vídeos novos aparecem sozinhos.</p>
   <div class="find">
@@ -142,7 +145,7 @@ let cfg=load('mt_cfg',{pin:'',key:'',open:false,
   cats:'Ciência: @manualdomundo, @CienciaTodoDia\nCuriosidades: @nerdologia',
   words:'+18, nsfw, terror, assustador, sangue, gore, sexy, aposta, apostas, bet, cassino, tigrinho, briga',
   bch:''});
-let chc=load('mt_ch',{}), feed=load('mt_feed2',{}), hist=load('mt_hist',[]);
+let nm=load('mt_nm',{}), chc=load('mt_ch',{}), feed=load('mt_feed2',{}), hist=load('mt_hist',[]);
 const today=()=>new Date().toLocaleDateString('sv');
 let used=load('mt_used',{d:today(),s:0});
 const minD=()=>+(cfg.minDur??181), maxD=()=>+(cfg.maxDur??0), lim=()=>+(cfg.limit??0);
@@ -341,7 +344,20 @@ $('fChips').innerHTML='<details open style="width:100%"><summary style="cursor:p
 $('fChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('fQ').value=b.dataset.q;$('fCat').value=b.dataset.g;findCh()});
 $('fGo').onclick=findCh;$('fQ').addEventListener('keydown',e=>{if(e.key==='Enter')findCh()});
 function catNames(){return $('cCats').value.split('\n').map(l=>l.split(':')[0].trim()).filter(Boolean)}
-function refreshCats(){$('fCats').innerHTML=catNames().map(n=>`<option value="${esc(n)}">`).join('')}
+function parseLines(){return $('cCats').value.split('\n').filter(l=>l.trim())}
+function removeCh(h){
+  const hl=h.toLowerCase();
+  const lines=parseLines().map(l=>{const i=l.indexOf(':');if(i<0)return l;const n=l.slice(0,i).trim();
+    const chs=l.slice(i+1).split(',').map(x=>x.trim()).filter(x=>x&&x.toLowerCase()!==hl);return chs.length?n+': '+chs.join(', '):null}).filter(Boolean);
+  $('cCats').value=lines.join('\n');refreshCats();
+  document.querySelectorAll('#fRes button[data-h]').forEach(b=>{if(b.dataset.h.toLowerCase()===hl){b.textContent='Adicionar';b.classList.remove('added')}});
+}
+function renderAppr(){
+  const cs=parseLines().map(l=>{const i=l.indexOf(':');return i<0?null:{n:l.slice(0,i).trim(),ch:l.slice(i+1).split(',').map(x=>x.trim()).filter(Boolean)}}).filter(c=>c&&c.ch.length);
+  $('cAppr').innerHTML=cs.length?cs.map(c=>`<div><small class="hint">${esc(c.n)}</small><div class="chips">${c.ch.map(h=>`<button data-rm="${esc(h)}" title="Remover">${esc(nm[h]||(chc[h]&&chc[h].title)||h)}</button>`).join('')}</div></div>`).join('')+'<p class="hint">Toque num canal para retirar. Depois toque em Salvar.</p>':'';
+}
+$('cAppr').addEventListener('click',e=>{const b=e.target.closest('button[data-rm]');if(b)removeCh(b.dataset.rm)});
+function refreshCats(){renderAppr();$('fCats').innerHTML=catNames().map(n=>`<option value="${esc(n)}">`).join('')}
 $('cCats').addEventListener('input',refreshCats);
 const fmt=n=>{n=+n;return n>=1e6?(n/1e6).toFixed(1).replace('.0','')+' mi':n>=1e3?Math.round(n/1e3)+' mil':String(n||0)};
 async function findCh(){
@@ -361,13 +377,14 @@ async function findCh(){
   }catch(e){$('fMsg').textContent='Erro: '+e.message}
 }
 $('fRes').addEventListener('click',e=>{
-  const b=e.target.closest('button[data-h]');if(!b||b.classList.contains('added'))return;
+  const b=e.target.closest('button[data-h]');if(!b)return;if(b.classList.contains('added')){removeCh(b.dataset.h);$('fMsg').textContent='Canal retirado. Não esqueça de tocar em Salvar.';return}
   const cat=($('fCat').value.trim()||'Outros').replace(/:/g,'');
   const lines=$('cCats').value.split('\n').filter(l=>l.trim());
   const i=lines.findIndex(l=>l.split(':')[0].trim().toLowerCase()===cat.toLowerCase());
   if(i>=0)lines[i]=lines[i].replace(/\s*,?\s*$/,'')+', '+b.dataset.h;else lines.push(cat+': '+b.dataset.h);
+  const t=b.closest('.ch').querySelector('strong');if(t){nm[b.dataset.h]=t.textContent;save('mt_nm',nm)}
   $('cCats').value=lines.join('\n');refreshCats();
-  b.textContent='Adicionado';b.classList.add('added');$('fMsg').textContent='Adicionado em “'+cat+'”. Não esqueça de tocar em Salvar.';
+  b.textContent='Adicionado';b.classList.add('added');$('fMsg').textContent='Adicionado em “'+cat+'”. Toque de novo para retirar. Não esqueça de tocar em Salvar.';
 });
 openCat(0);
 }

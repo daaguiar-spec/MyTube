@@ -33,6 +33,12 @@ label{display:block;font-weight:700;margin:16px 0 6px}
 .panel input,.panel textarea{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid #33496b;background:#0f1b2d;color:var(--ink)}
 textarea{min-height:110px}.hint{color:var(--mut);font-size:14px;margin:4px 0 0}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;margin-top:16px}.chk input{width:22px;height:22px}
+.find{background:#0f1b2d;border-radius:12px;padding:14px;margin-top:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chips button{min-height:36px;padding:0 12px;font-size:14px}
+.ch{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid #22344f}
+.ch img{width:48px;height:48px;border-radius:50%;flex:none;background:#22344f}
+.ch div{flex:1}.ch strong{display:block;line-height:1.3}.ch small{color:var(--mut);display:block;max-height:2.8em;overflow:hidden}
+.ch button.added{background:#2f6f4f;color:#fff}
 </style>
 </head>
 <body>
@@ -66,6 +72,15 @@ textarea{min-height:110px}.hint{color:var(--mut);font-size:14px;margin:4px 0 0}
   <label for="cCats">Categorias e canais aprovados</label>
   <textarea id="cCats"></textarea>
   <p class="hint">Uma categoria por linha: <b>Nome: @canal1, @canal2</b>. Aceita @nome, ID (UC…) ou link do canal. Os vídeos novos aparecem sozinhos.</p>
+  <div class="find">
+    <label for="fQ" style="margin-top:0">Encontrar canais</label>
+    <p class="hint">Pesquise um assunto e toque em “Adicionar” nos canais que você aprovar. Depois toque em Salvar.</p>
+    <div class="chips" id="fChips"></div>
+    <div class="row" style="margin-top:8px"><input id="fQ" type="search" placeholder="Ex.: experimentos de ciência" style="flex:1 1 200px"><button id="fGo">Buscar</button></div>
+    <div class="row"><span class="hint" style="margin:0">Adicionar em:</span><input id="fCat" list="fCats" placeholder="Categoria" style="flex:1 1 160px"><datalist id="fCats"></datalist></div>
+    <p class="hint" id="fMsg"></p>
+    <div id="fRes"></div>
+  </div>
   <label for="cWords">Palavras bloqueadas</label>
   <textarea id="cWords" style="min-height:80px"></textarea>
   <p class="hint">Separadas por vírgula. Vídeos com essas palavras no título ou na descrição não aparecem.</p>
@@ -180,7 +195,7 @@ function play(id,title,chId){
 function closePlayer(){$('frame').innerHTML='';$('player').classList.remove('show')}
 function openCfg(){
   $('cKey').value=cfg.key;$('cCats').value=cfg.cats;$('cWords').value=cfg.words;$('cBch').value=cfg.bch;$('cOpen').checked=cfg.open;$('cPin').value=cfg.pin;
-  $('cfg').classList.add('show');
+  $('cfg').classList.add('show');refreshCats();
 }
 function askPin(){
   if(!cfg.pin){parent=true;openCfg();return}
@@ -221,6 +236,39 @@ $('cImp').onclick=()=>{
     openCfg();openCat(0,true);
   }catch(e){const v=$('cCode').value;$('cMsg').textContent='Código inválido ('+(e&&e.message||'formato')+'; '+v.length+' caracteres; começa com “'+v.trim().slice(0,6)+'”). Confira se copiou tudo, do começo (MT1:) ao fim.'}
 };
+const sugg=['ciência para jovens','experimentos','astronomia','história','curiosidades','matemática','programação','minecraft','xadrez','futebol','desenho e arte','culinária','animais','inglês para iniciantes'];
+$('fChips').innerHTML=sugg.map(x=>`<button data-q="${esc(x)}">${esc(x)}</button>`).join('');
+$('fChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('fQ').value=b.dataset.q;if(!$('fCat').value)$('fCat').value=b.dataset.q.charAt(0).toUpperCase()+b.dataset.q.slice(1);findCh()});
+$('fGo').onclick=findCh;$('fQ').addEventListener('keydown',e=>{if(e.key==='Enter')findCh()});
+function catNames(){return $('cCats').value.split('\n').map(l=>l.split(':')[0].trim()).filter(Boolean)}
+function refreshCats(){$('fCats').innerHTML=catNames().map(n=>`<option value="${esc(n)}">`).join('')}
+$('cCats').addEventListener('input',refreshCats);
+const fmt=n=>{n=+n;return n>=1e6?(n/1e6).toFixed(1).replace('.0','')+' mi':n>=1e3?Math.round(n/1e3)+' mil':String(n||0)};
+async function findCh(){
+  const q=$('fQ').value.trim();if(!q)return;
+  const key=$('cKey').value.trim();if(!key){$('fMsg').textContent='Cole a chave da API primeiro.';return}
+  cfg.key=key;$('fMsg').textContent='Buscando…';$('fRes').innerHTML='';
+  try{
+    const s=await yt('search',{part:'snippet',q,type:'channel',safeSearch:'strict',maxResults:15,regionCode:'BR',relevanceLanguage:'pt'});
+    const ids=s.items.map(i=>i.snippet.channelId||i.id.channelId).filter(Boolean);
+    if(!ids.length){$('fMsg').textContent='Nenhum canal encontrado.';return}
+    const c=await yt('channels',{part:'snippet,statistics',id:ids.join(',')});
+    const have=$('cCats').value.toLowerCase();
+    const list=c.items.sort((a,b)=>(+b.statistics.subscriberCount||0)-(+a.statistics.subscriberCount||0));
+    $('fMsg').textContent=list.length+' canais. Confira antes de adicionar.';
+    $('fRes').innerHTML=list.map(ch=>{const h=ch.snippet.customUrl||ch.id;const done=have.includes(h.toLowerCase());
+      return `<div class="ch"><img loading="lazy" src="${esc((ch.snippet.thumbnails.default||{}).url)}" alt=""><div><strong>${esc(ch.snippet.title)}</strong><small>${fmt(ch.statistics.subscriberCount)} inscritos · ${esc(ch.snippet.description)}</small><a href="https://www.youtube.com/channel/${esc(ch.id)}" target="_blank" rel="noopener" style="color:var(--acc);font-size:14px">Ver canal</a></div><button data-h="${esc(h)}" class="${done?'added':''}">${done?'Adicionado':'Adicionar'}</button></div>`}).join('');
+  }catch(e){$('fMsg').textContent='Erro: '+e.message}
+}
+$('fRes').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-h]');if(!b||b.classList.contains('added'))return;
+  const cat=($('fCat').value.trim()||'Outros').replace(/:/g,'');
+  const lines=$('cCats').value.split('\n').filter(l=>l.trim());
+  const i=lines.findIndex(l=>l.split(':')[0].trim().toLowerCase()===cat.toLowerCase());
+  if(i>=0)lines[i]=lines[i].replace(/\s*,?\s*$/,'')+', '+b.dataset.h;else lines.push(cat+': '+b.dataset.h);
+  $('cCats').value=lines.join('\n');refreshCats();
+  b.textContent='Adicionado';b.classList.add('added');$('fMsg').textContent='Adicionado em “'+cat+'”. Não esqueça de tocar em Salvar.';
+});
 openCat(0);
 }
 </script>

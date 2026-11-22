@@ -11,8 +11,9 @@
 <meta name="apple-mobile-web-app-title" content="SixSeven Tube">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261122160142">
+<meta name="mt-build" content="20261122170603">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0f1b2d;--card:#18273e;--ink:#f3f6fb;--mut:#9fb0c8;--acc:#ffc53d;--red:#ff5d5d}
@@ -54,6 +55,24 @@ textarea{min-height:110px}.hint{color:var(--mut);font-size:14px;margin:4px 0 0}
 .nx img{width:42%;max-width:200px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;flex:none;background:#22344f}
 .nx strong{display:block;font-size:14px;line-height:1.3}.nx small{color:var(--mut);font-size:13px}
 #bFav.on{background:var(--acc);color:#1a1300}
+body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+#tabs button{display:flex;gap:6px;align-items:center}#tabs i{font-size:18px}
+.th{position:relative}.du{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.8);color:#fff;font-size:12px;font-weight:700;padding:1px 6px;border-radius:5px}
+.pb{position:absolute;left:0;bottom:0;height:4px;background:var(--acc)}
+#grid.home{display:block;padding:0 0 12px}
+.sec{display:flex;justify-content:space-between;align-items:baseline;padding:18px max(4vw,14px) 8px}.sec h3{margin:0;font-size:18px}
+.sec button{background:none;color:var(--acc);min-height:32px;padding:0 4px;font-size:14px}
+.shelf{display:flex;gap:12px;overflow-x:auto;padding:0 max(4vw,14px) 6px;scroll-snap-type:x mandatory;scrollbar-width:none}.shelf::-webkit-scrollbar{display:none}
+.shelf .v{flex:none;width:min(62vw,260px);scroll-snap-align:start}
+#tbar{display:none;padding:10px max(4vw,14px) 0;font-size:13px;color:var(--mut)}#tbar>div:first-child{display:flex;justify-content:space-between}
+#tbar .bar{height:6px;background:#22344f;border-radius:3px;margin-top:5px;overflow:hidden}#tbar .bar i{display:block;height:100%;background:var(--acc);border-radius:3px}
+#bnav{position:fixed;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:repeat(4,1fr);background:#0b1422;border-top:1px solid #1d2d47;padding:4px 0 calc(4px + env(safe-area-inset-bottom))}
+#bnav button{background:none;border-radius:0;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;color:var(--mut);padding:0}
+#bnav i{font-size:22px}#bnav button.on{color:var(--acc)}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:12px max(4vw,14px)}
+.cgrid button{background:var(--card);border-radius:14px;min-height:96px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:14px;text-align:left;font-size:16px}
+.cgrid i{font-size:28px;color:var(--acc)}
+#bPais.mini i{font-size:13px}
 #ptr{height:0;overflow:hidden;text-align:center;color:var(--mut);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:height .2s}
 header{position:sticky;padding-top:calc(env(safe-area-inset-top) + 14px)}
 .panel select{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid #33496b;background:#0f1b2d;color:var(--ink)}
@@ -69,12 +88,19 @@ header h1{margin-right:auto;order:1}
 <header>
   <h1>SixSeven <b>Tube</b></h1>
   <input id="q" type="search" placeholder="Pesquisar vídeos…" aria-label="Pesquisar">
-  <button id="bPais" class="mini">Filtro Pais</button>
+  <button id="bPais" class="mini" aria-label="Filtro Pais"><i class="ti ti-lock"></i> Pais</button>
 </header>
 <div id="ptr">↓ Puxe para atualizar</div>
+<div id="tbar"><div><span>Tempo de hoje</span><span id="tbarT"></span></div><div class="bar"><i id="tbarF"></i></div></div>
 <nav id="tabs"></nav>
 <p id="msg"></p>
 <main id="grid"></main>
+<nav id="bnav">
+  <button data-v="-1"><i class="ti ti-home"></i>Início</button>
+  <button data-v="-4"><i class="ti ti-layout-grid"></i>Categorias</button>
+  <button data-v="-2"><i class="ti ti-star"></i>Favoritos</button>
+  <button data-v="-3"><i class="ti ti-history"></i>Histórico</button>
+</nav>
 
 <div class="ov" id="player"><div class="box">
   <div class="frame" id="frame"></div>
@@ -218,30 +244,46 @@ async function loadCat(c,force){
   if(errs.length)msg(errs.join(' · '));
   return all;
 }
+let ytp=null;{const t=document.createElement('script');t.src='https://www.youtube.com/iframe_api';document.head.appendChild(t)}
 let lastList=[], favs=load('mt_favs',[]);
 function allVids(){const m=new Map();[...lastList,...Object.values(feed).flatMap(f=>f.v),...favs].forEach(v=>{if(v&&v.id&&!m.has(v.id))m.set(v.id,v)});return m}
+let prog=load('mt_prog',{});
+const thumbOf=v=>v.thumb||('https://i.ytimg.com/vi/'+encodeURIComponent(v.id)+'/mqdefault.jpg');
+function card(v){const p=prog[v.id];const pc=p&&p.d?Math.min(100,Math.round(p.t/p.d*100)):0;
+  return `<button class="v" data-id="${esc(v.id)}" data-t="${esc(v.title)}" data-c="${esc(v.chId)}" data-n="${esc(v.ch)}"><div class="th"><img loading="lazy" src="${esc(thumbOf(v))}" alt="">${v.dur!=null?`<span class="du">${fmtD(v.dur)}</span>`:''}${pc>2?`<span class="pb" style="width:${pc}%"></span>`:''}</div><div><strong>${esc(v.title)}</strong><small>${esc(v.ch||'')}</small></div></button>`}
+const icoFor=n=>{n=norm(n);const m=[['cienc','flask'],['curios','bulb'],['educ','school'],['escol','school'],['tecn','cpu'],['program','code'],['game','device-gamepad-2'],['jogo','device-gamepad-2'],['esport','ball-football'],['futeb','ball-football'],['desaf','trophy'],['divers','mood-happy'],['humor','mood-happy'],['desenho','brush'],['arte','palette'],['anima','movie'],['music','music'],['natur','leaf'],['anim','paw'],['culin','chef-hat'],['faca','tools'],['idiom','language'],['ingles','language'],['livro','book'],['histor','book'],['viag','world'],['carro','car'],['magic','wand'],['saude','heart']].find(([k])=>n.includes(k));return m?m[1]:'folder'};
 function show(list,empty){
-  const l=list.filter(ok);lastList=l;
-  $('grid').innerHTML=l.length?l.map(v=>`<button class="v" data-id="${esc(v.id)}" data-t="${esc(v.title)}" data-c="${esc(v.chId)}" data-n="${esc(v.ch)}">
-    <img loading="lazy" src="${esc(v.thumb)}" alt=""><div><strong>${esc(v.title)}</strong><small>${esc(v.ch)}${v.dur!=null?' · '+fmtD(v.dur):''}</small></div></button>`).join('')
+  const l=list.filter(ok);lastList=l;$('grid').className='';
+  $('grid').innerHTML=l.length?l.map(card).join('')
     :`<p style="color:var(--mut)">${empty||'Nenhum vídeo por aqui.'}</p>`;
 }
 function tabs(){
   const cs=cats();
-  $('tabs').innerHTML=`<button data-i="-1" class="${cur===-1?'on':''}">Todos</button>`+(favs.length?`<button data-i="-2" class="${cur===-2?'on':''}">⭐ Favoritos</button>`:'')+cs.map((c,i)=>`<button data-i="${i}" class="${i===cur?'on':''}">${esc(c.name)}</button>`).join('');
+  $('tabs').innerHTML=`<button data-i="-1" class="${cur===-1?'on':''}"><i class="ti ti-home"></i>Todos</button>`+cs.map((c,i)=>`<button data-i="${i}" class="${i===cur?'on':''}"><i class="ti ti-${icoFor(c.name)}"></i>${esc(c.name)}</button>`).join('');
+  $('tabs').style.display=(cur<-1)?'none':'';
+  document.querySelectorAll('#bnav button').forEach(b=>b.classList.toggle('on',+b.dataset.v===(cur>=0?-1:cur)));
+  tbar();
 }
 async function openCat(i,force){
   cur=i;tabs();msg('');$('q').value='';
   const c=cats()[i];
   if(!cfg.key){show([],'Peça para um responsável configurar o app em “Filtro Pais”.');return}
-  if(i===-2){show(favs,'Nenhum favorito ainda.');return}
+  if(i===-2){show(favs,'Nenhum favorito ainda. Toque em ☆ Favoritar num vídeo.');return}
+  if(i===-3){const seen=new Set();show(hist.filter(h=>!seen.has(h.id)&&seen.add(h.id)).map(h=>allVids().get(h.id)||{id:h.id,title:h.t,ch:h.c}),'Nada assistido ainda.');return}
+  if(i===-4){$('grid').className='';
+    $('grid').innerHTML=`<div class="cgrid" style="grid-column:1/-1;padding:0">${cats().map((c,k)=>`<button data-cat="${k}"><i class="ti ti-${icoFor(c.name)}"></i>${esc(c.name)}</button>`).join('')||'<p class="hint">Nenhuma categoria ainda.</p>'}</div>`;return}
   if(i===-1){
     if(!cats().length){show([],'Nenhuma categoria criada ainda.');return}
-    $('grid').innerHTML='<p style="color:var(--mut)">Carregando…</p>';
-    const seen=new Set(),all=[];
-    for(const k of cats())for(const v of await loadCat(k,force))if(!seen.has(v.id)){seen.add(v.id);all.push(v)}
-    all.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
-    if(cur===-1)show(all);return;
+    $('grid').className='home';$('grid').innerHTML='<p style="color:var(--mut);padding:0 max(4vw,14px)">Carregando…</p>';
+    const shelves=[];const pool=[];
+    for(const [k,c2] of cats().entries()){const vs=(await loadCat(c2,force)).filter(ok);pool.push(...vs);if(vs.length)shelves.push({k,n:c2.name,vs:vs.slice(0,10)})}
+    if(cur!==-1)return;
+    const vm=allVids();
+    const cont=Object.entries(prog).filter(([id,p])=>p.d&&p.t>30&&p.t<p.d-20).sort((a,b)=>b[1].ts-a[1].ts).map(([id])=>vm.get(id)||(()=>{const h=hist.find(x=>x.id===id);return h?{id,title:h.t,ch:h.c}:null})()).filter(v=>v&&ok(v)).slice(0,10);
+    lastList=pool;
+    const sec=(t,vs,k)=>`<div class="sec"><h3>${esc(t)}</h3>${k!=null?`<button data-cat="${k}">Ver tudo</button>`:''}</div><div class="shelf">${vs.map(card).join('')}</div>`;
+    $('grid').innerHTML=(cont.length?sec('Continuar assistindo',cont,null):'')+shelves.map(x=>sec('Novos em '+x.n,x.vs,x.k)).join('')||'<p class="hint" style="padding:0 max(4vw,14px)">Nenhum vídeo por aqui.</p>';
+    return;
   }
   if(!c){show([],'Nenhuma categoria criada ainda.');return}
   $('grid').innerHTML='<p style="color:var(--mut)">Carregando…</p>';
@@ -264,12 +306,16 @@ async function search(q){
   }catch(e){msg('Erro na busca: '+e.message)}
 }
 function timeUp(){return lim()&&usedNow()>=lim()*60}
-function showLeft(){$('left').textContent=lim()?'Tempo restante hoje: '+Math.max(0,Math.ceil((lim()*60-usedNow())/60))+' min':''}
+function tbar(){const on=!!lim()&&cur>=-1;$('tbar').style.display=on?'block':'none';if(!on)return;const left=Math.max(0,lim()*60-usedNow());$('tbarT').textContent=Math.ceil(left/60)+' min restantes';$('tbarF').style.width=Math.round(left/(lim()*60)*100)+'%'}
+function showLeft(){tbar();$('left').textContent=lim()?'Tempo restante hoje: '+Math.max(0,Math.ceil((lim()*60-usedNow())/60))+' min':''}
 function play(id,title,chId,chName){
   if(timeUp()){$('lock').classList.add('show');return}
   playing={id,chId};
   hist.unshift({id,t:title,c:chName||'',ts:Date.now()});hist=hist.slice(0,300);save('mt_hist',hist);showLeft();
-  $('frame').innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?rel=0&modestbranding=1&autoplay=1&iv_load_policy=3" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
+  const st=prog[id]&&prog[id].d&&prog[id].t<prog[id].d-20?Math.floor(prog[id].t):0;
+  if(window.YT&&YT.Player){$('frame').innerHTML='<div id="ytp"></div>';
+    try{ytp=new YT.Player('ytp',{host:'https://www.youtube-nocookie.com',videoId:id,playerVars:{rel:0,modestbranding:1,autoplay:1,iv_load_policy:3,playsinline:1,start:st}})}catch(e){ytp=null}}
+  else{ytp=null;$('frame').innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?rel=0&modestbranding=1&autoplay=1&iv_load_policy=3&playsinline=1&start=${st}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`}
   $('pt').textContent=title;$('bBloq').style.display=parent?'':'none';
   const v=allVids().get(id)||{id,title,chId,ch:chName};
   const dt=v.date?new Date(v.date).toLocaleDateString('pt-BR'):'';
@@ -282,9 +328,11 @@ function play(id,title,chId,chName){
   $('player').classList.add('show');$('player').scrollTop=0;
 }
 function favBtn(){const on=playing&&favs.some(f=>f.id===playing.id);$('bFav').textContent=on?'★ Favorito':'☆ Favoritar';$('bFav').classList.toggle('on',!!on)}
-function closePlayer(){$('frame').innerHTML='';$('player').classList.remove('show')}
+function saveProg(){try{if(ytp&&ytp.getCurrentTime&&playing){const t=ytp.getCurrentTime(),d=ytp.getDuration();if(d>0){prog[playing.id]={t,d,ts:Date.now()};const ks=Object.keys(prog);if(ks.length>300)ks.sort((a,b)=>prog[a].ts-prog[b].ts).slice(0,ks.length-300).forEach(k=>delete prog[k]);save('mt_prog',prog)}}}catch(e){}}
+function closePlayer(){saveProg();try{ytp&&ytp.destroy&&ytp.destroy()}catch(e){}ytp=null;$('frame').innerHTML='';$('player').classList.remove('show')}
 setInterval(()=>{
   if(!$('player').classList.contains('show')||document.visibilityState!=='visible')return;
+  if(used.s%5===0)saveProg();
   usedNow();used.s++;if(used.s%10===0)save('mt_used',used);
   if(used.s%60===0)showLeft();
   if(timeUp()){save('mt_used',used);closePlayer();$('lock').classList.add('show')}
@@ -304,6 +352,8 @@ function askPin(){
   $('pinIn').value='';$('pinErr').textContent='';$('pin').classList.add('show');$('pinIn').focus();
 }
 
+$('bnav').addEventListener('click',e=>{const b=e.target.closest('button');if(b){openCat(+b.dataset.v);scrollTo(0,0)}});
+$('grid').addEventListener('click',e=>{const b=e.target.closest('button[data-cat]');if(b){openCat(+b.dataset.cat);scrollTo(0,0)}});
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)openCat(+b.dataset.i)});
 $('grid').addEventListener('click',e=>{const b=e.target.closest('.v');if(b)play(b.dataset.id,b.dataset.t,b.dataset.c,b.dataset.n)});
 let tm;$('q').addEventListener('keydown',e=>{if(e.key==='Enter'){clearTimeout(tm);search($('q').value)}});

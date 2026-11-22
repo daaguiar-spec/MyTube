@@ -303,9 +303,30 @@ $('cImp').onclick=()=>{
     openCfg();openCat(0,true);
   }catch(e){const v=$('cCode').value;$('cMsg').textContent='Código inválido ('+(e&&e.message||'formato')+'; '+v.length+' caracteres; começa com “'+v.trim().slice(0,6)+'”). Confira se copiou tudo, do começo (MT1:) ao fim.'}
 };
-const sugg=['ciência para jovens','experimentos','astronomia','história','curiosidades','matemática','programação','minecraft','xadrez','futebol','desenho e arte','culinária','animais','inglês para iniciantes'];
-$('fChips').innerHTML=sugg.map(x=>`<button data-q="${esc(x)}">${esc(x)}</button>`).join('');
-$('fChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('fQ').value=b.dataset.q;if(!$('fCat').value)$('fCat').value=b.dataset.q.charAt(0).toUpperCase()+b.dataset.q.slice(1);findCh()});
+const sugg={
+ 'Ciência':['ciência para jovens','experimentos','astronomia','física divertida','química experimentos','biologia','dinossauros','corpo humano'],
+ 'Curiosidades':['curiosidades','fatos incríveis','como as coisas funcionam','mistérios da história'],
+ 'Educação':['matemática','português','história do Brasil','geografia','reforço escolar','aulas de ciências'],
+ 'Tecnologia':['programação para iniciantes','robótica','tecnologia','inteligência artificial explicada','eletrônica'],
+ 'Games':['minecraft','roblox','fortnite','pokémon','jogos de lógica','speedrun','xadrez'],
+ 'Esportes':['futebol','basquete','skate','vôlei','natação','artes marciais','surf','ciclismo'],
+ 'Desafios e diversão':['mrbeast','desafios','youtubers brasileiros','pegadinhas leves','recordes mundiais'],
+ 'Humor':['humor para família','animação engraçada','comédia infantil'],
+ 'Desenhos e animação':['desenhos animados','animação','anime para crianças','stop motion'],
+ 'Arte e desenho':['como desenhar','pintura','origami','artesanato','lettering'],
+ 'Música':['aprender violão','aprender piano','bateria','música','canto'],
+ 'Natureza e animais':['animais','vida selvagem','oceano','documentário natureza','pets'],
+ 'Culinária':['culinária fácil','receitas para crianças','confeitaria'],
+ 'Faça você mesmo':['faça você mesmo','lego','construções','marcenaria','invenções'],
+ 'Idiomas':['inglês para iniciantes','inglês para crianças','espanhol básico'],
+ 'Livros e histórias':['livros para jovens','contação de histórias','resumo de livros'],
+ 'Viagens e mundo':['viagens','países do mundo','culturas'],
+ 'Carros e máquinas':['carros','aviões','trens','foguetes','máquinas gigantes'],
+ 'Mágica e truques':['mágica','truques de cartas','ilusões de ótica'],
+ 'Saúde e esporte':['exercícios para jovens','yoga','alimentação saudável']
+};
+$('fChips').innerHTML=Object.entries(sugg).map(([g,qs])=>`<details style="width:100%"><summary style="cursor:pointer;font-weight:700;padding:6px 0">${esc(g)}</summary><div class="chips" style="padding:4px 0 8px">${qs.map(x=>`<button data-q="${esc(x)}" data-g="${esc(g)}">${esc(x)}</button>`).join('')}</div></details>`).join('');
+$('fChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('fQ').value=b.dataset.q;$('fCat').value=b.dataset.g;findCh()});
 $('fGo').onclick=findCh;$('fQ').addEventListener('keydown',e=>{if(e.key==='Enter')findCh()});
 function catNames(){return $('cCats').value.split('\n').map(l=>l.split(':')[0].trim()).filter(Boolean)}
 function refreshCats(){$('fCats').innerHTML=catNames().map(n=>`<option value="${esc(n)}">`).join('')}

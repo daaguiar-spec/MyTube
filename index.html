@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meu Tube</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f1b2d;--card:#18273e;--ink:#f3f6fb;--mut:#9fb0c8;--acc:#ffc53d;--red:#ff5d5d}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Nunito,system-ui,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:14px max(4vw,14px);background:#0b1422;position:sticky;top:0;z-index:5}
+h1{font-size:24px;margin:0 8px 0 0;font-weight:900}h1 b{color:var(--acc)}
+#q{flex:1 1 220px;font:inherit;font-size:16px;padding:11px 14px;border-radius:999px;border:0;background:#22344f;color:var(--ink)}
+button{font:inherit;font-weight:700;min-height:44px;padding:0 16px;border-radius:999px;border:0;background:#22344f;color:var(--ink);cursor:pointer}
+button.on,button.pri{background:var(--acc);color:#1a1300}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+#tabs{display:flex;gap:8px;overflow-x:auto;padding:12px max(4vw,14px)}#tabs button{flex:none}
+#msg{padding:0 max(4vw,14px);color:var(--mut)}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;padding:12px max(4vw,14px) 40px}
+.v{background:var(--card);border-radius:14px;overflow:hidden;cursor:pointer;border:0;padding:0;text-align:left;color:inherit;min-height:0;display:block;width:100%}
+.v img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#22344f}
+.v div{padding:10px 12px}.v strong{display:block;font-size:15px;line-height:1.3}.v small{color:var(--mut)}
+.ov{position:fixed;inset:0;background:rgba(5,10,18,.92);display:none;z-index:10;padding:16px;overflow:auto}
+.ov.show{display:block}
+.box{max-width:960px;margin:0 auto}
+.frame{position:relative;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden}
+.frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;align-items:center}
+.panel{background:var(--card);border-radius:16px;padding:20px;max-width:720px;margin:0 auto}
+label{display:block;font-weight:700;margin:16px 0 6px}
+.panel input,.panel textarea{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid #33496b;background:#0f1b2d;color:var(--ink)}
+textarea{min-height:110px}.hint{color:var(--mut);font-size:14px;margin:4px 0 0}
+.chk{display:flex;gap:10px;align-items:center;font-weight:700;margin-top:16px}.chk input{width:22px;height:22px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Meu <b>Tube</b></h1>
+  <input id="q" type="search" placeholder="Pesquisar vídeos…" aria-label="Pesquisar">
+  <button id="bPais">Pais</button>
+</header>
+<nav id="tabs"></nav>
+<p id="msg"></p>
+<main id="grid"></main>
+
+<div class="ov" id="player"><div class="box">
+  <div class="frame" id="frame"></div>
+  <h2 id="pt" style="margin:12px 0 0;font-size:20px"></h2>
+  <div class="row"><button id="bFechar" class="pri">Fechar</button><button id="bBloq" style="display:none;background:var(--red)">Bloquear este canal</button></div>
+</div></div>
+
+<div class="ov" id="pin"><div class="panel" style="max-width:380px;margin-top:10vh">
+  <h2 style="margin-top:0" id="pinT">Área dos pais</h2>
+  <input id="pinIn" type="password" inputmode="numeric" placeholder="PIN">
+  <p class="hint" id="pinErr"></p>
+  <div class="row"><button class="pri" id="pinOk">Entrar</button><button id="pinX">Cancelar</button></div>
+</div></div>
+
+<div class="ov" id="cfg"><div class="panel">
+  <h2 style="margin-top:0">Configurações dos pais</h2>
+  <label for="cKey">Chave da API do YouTube</label>
+  <input id="cKey" placeholder="AIza…">
+  <p class="hint">Gratuita, criada no Google Cloud (YouTube Data API v3).</p>
+  <label for="cCats">Categorias e canais aprovados</label>
+  <textarea id="cCats"></textarea>
+  <p class="hint">Uma categoria por linha: <b>Nome: @canal1, @canal2</b>. Aceita @nome, ID (UC…) ou link do canal. Os vídeos novos aparecem sozinhos.</p>
+  <label for="cWords">Palavras bloqueadas</label>
+  <textarea id="cWords" style="min-height:80px"></textarea>
+  <p class="hint">Separadas por vírgula. Vídeos com essas palavras no título ou na descrição não aparecem.</p>
+  <label for="cBch">Canais bloqueados (IDs)</label>
+  <textarea id="cBch" style="min-height:60px"></textarea>
+  <label class="chk"><input type="checkbox" id="cOpen"> Permitir busca em todo o YouTube (SafeSearch estrito)</label>
+  <p class="hint">Desligado: a busca só procura nos canais aprovados.</p>
+  <label for="cPin">PIN dos pais</label>
+  <input id="cPin" type="password" inputmode="numeric">
+  <div class="row"><button class="pri" id="cSave">Salvar</button><button id="cX">Fechar</button></div>
+</div></div>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const API='https://www.googleapis.com/youtube/v3/';
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let cfg=load('mt_cfg',{pin:'',key:'',open:false,
+  cats:'Ciência: @manualdomundo, @CienciaTodoDia\nCuriosidades: @nerdologia',
+  words:'+18, nsfw, terror, assustador, sangue, gore, sexy, aposta, apostas, bet, cassino, tigrinho, briga',
+  bch:''});
+let chc=load('mt_ch',{}), feed=load('mt_feed',{});
+let cur=0, parent=false, playing=null;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+const cats=()=>cfg.cats.split('\n').map(l=>{const i=l.indexOf(':');if(i<0)return null;return{name:l.slice(0,i).trim(),ch:l.slice(i+1).split(',').map(s=>s.trim()).filter(Boolean)}}).filter(c=>c&&c.name);
+const msg=t=>$('msg').textContent=t||'';
+
+function ok(v){
+  if(cfg.bch.split(/[\s,]+/).includes(v.chId))return false;
+  const t=norm(v.title+' '+v.desc);
+  return !cfg.words.split(',').map(w=>norm(w.trim())).filter(Boolean).some(w=>
+    /^[a-z0-9]+$/.test(w)?new RegExp('\\b'+w+'\\b').test(t):t.includes(w));
+}
+async function yt(path,p){
+  p.key=cfg.key;
+  const r=await fetch(API+path+'?'+new URLSearchParams(p));const j=await r.json();
+  if(j.error)throw new Error(j.error.message);return j;
+}
+async function resolve(inp){
+  if(chc[inp])return chc[inp];
+  let m=inp.match(/(UC[\w-]{22})/), p={part:'contentDetails,snippet'};
+  if(m)p.id=m[1];else{const h=(inp.match(/@([\w.\-]+)/)||[,inp])[1];p.forHandle='@'+h}
+  const j=await yt('channels',p);const c=j.items&&j.items[0];
+  if(!c)throw new Error('Canal não encontrado: '+inp);
+  chc[inp]={id:c.id,title:c.snippet.title,up:c.contentDetails.relatedPlaylists.uploads};save('mt_ch',chc);
+  return chc[inp];
+}
+async function loadCat(c,force){
+  const f=feed[c.name];
+  if(!force&&f&&Date.now()-f.t<3600e3)return f.v;
+  let all=[],errs=[];
+  for(const inp of c.ch){
+    try{
+      const ch=await resolve(inp);
+      const j=await yt('playlistItems',{part:'snippet',playlistId:ch.up,maxResults:15});
+      all.push(...j.items.map(i=>({id:i.snippet.resourceId.videoId,title:i.snippet.title,desc:i.snippet.description,
+        ch:ch.title,chId:ch.id,thumb:(i.snippet.thumbnails.medium||i.snippet.thumbnails.default||{}).url,date:i.snippet.publishedAt})));
+    }catch(e){errs.push(e.message)}
+  }
+  all.sort((a,b)=>b.date.localeCompare(a.date));
+  feed[c.name]={t:Date.now(),v:all};save('mt_feed',feed);
+  if(errs.length)msg(errs.join(' · '));
+  return all;
+}
+function show(list,empty){
+  const l=list.filter(ok);
+  $('grid').innerHTML=l.length?l.map(v=>`<button class="v" data-id="${esc(v.id)}" data-t="${esc(v.title)}" data-c="${esc(v.chId)}">
+    <img loading="lazy" src="${esc(v.thumb)}" alt=""><div><strong>${esc(v.title)}</strong><small>${esc(v.ch)}</small></div></button>`).join('')
+    :`<p style="color:var(--mut)">${empty||'Nenhum vídeo por aqui.'}</p>`;
+}
+function tabs(){
+  const cs=cats();
+  $('tabs').innerHTML=cs.map((c,i)=>`<button data-i="${i}" class="${i===cur?'on':''}">${esc(c.name)}</button>`).join('');
+}
+async function openCat(i,force){
+  cur=i;tabs();msg('');$('q').value='';
+  const c=cats()[i];
+  if(!cfg.key){show([],'Peça para um responsável configurar o app em “Pais”.');return}
+  if(!c){show([],'Nenhuma categoria criada ainda.');return}
+  $('grid').innerHTML='<p style="color:var(--mut)">Carregando…</p>';
+  show(await loadCat(c,force));
+}
+async function search(q){
+  q=q.trim();if(!q)return openCat(cur);
+  msg('');
+  if(!cfg.open){
+    const nq=norm(q);
+    const all=Object.values(feed).flatMap(f=>f.v);
+    const seen=new Set();
+    show(all.filter(v=>!seen.has(v.id)&&seen.add(v.id)&&norm(v.title+' '+v.desc).includes(nq)),'Nada encontrado nos canais aprovados.');
+    return;
+  }
+  if(!ok({title:q,desc:'',chId:''})){show([],'Essa busca não é permitida.');return}
+  try{
+    const j=await yt('search',{part:'snippet',q,type:'video',safeSearch:'strict',maxResults:24,regionCode:'BR',relevanceLanguage:'pt',videoEmbeddable:'true'});
+    show(j.items.map(i=>({id:i.id.videoId,title:i.snippet.title,desc:i.snippet.description,ch:i.snippet.channelTitle,chId:i.snippet.channelId,thumb:(i.snippet.thumbnails.medium||{}).url})));
+  }catch(e){msg('Erro na busca: '+e.message)}
+}
+function play(id,title,chId){
+  playing={id,chId};
+  $('frame').innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?rel=0&modestbranding=1&autoplay=1&iv_load_policy=3" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
+  $('pt').textContent=title;$('bBloq').style.display=parent?'':'none';
+  $('player').classList.add('show');
+}
+function closePlayer(){$('frame').innerHTML='';$('player').classList.remove('show')}
+function openCfg(){
+  $('cKey').value=cfg.key;$('cCats').value=cfg.cats;$('cWords').value=cfg.words;$('cBch').value=cfg.bch;$('cOpen').checked=cfg.open;$('cPin').value=cfg.pin;
+  $('cfg').classList.add('show');
+}
+function askPin(){
+  if(!cfg.pin){parent=true;openCfg();return}
+  $('pinIn').value='';$('pinErr').textContent='';$('pin').classList.add('show');$('pinIn').focus();
+}
+
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)openCat(+b.dataset.i)});
+$('grid').addEventListener('click',e=>{const b=e.target.closest('.v');if(b)play(b.dataset.id,b.dataset.t,b.dataset.c)});
+let tm;$('q').addEventListener('keydown',e=>{if(e.key==='Enter'){clearTimeout(tm);search($('q').value)}});
+$('q').addEventListener('input',()=>{if(!$('q').value)openCat(cur)});
+$('bFechar').onclick=closePlayer;
+$('bBloq').onclick=()=>{if(!playing)return;cfg.bch=(cfg.bch+' '+playing.chId).trim();save('mt_cfg',cfg);closePlayer();openCat(cur)};
+$('bPais').onclick=askPin;
+$('pinX').onclick=()=>$('pin').classList.remove('show');
+$('pinOk').onclick=()=>{if($('pinIn').value===cfg.pin){parent=true;$('pin').classList.remove('show');openCfg()}else $('pinErr').textContent='PIN incorreto.'};
+$('pinIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinOk').click()});
+$('cX').onclick=()=>{$('cfg').classList.remove('show')};
+$('cSave').onclick=()=>{
+  cfg={key:$('cKey').value.trim(),cats:$('cCats').value,words:$('cWords').value,bch:$('cBch').value.trim(),open:$('cOpen').checked,pin:$('cPin').value.trim()};
+  save('mt_cfg',cfg);feed={};save('mt_feed',feed);
+  $('cfg').classList.remove('show');openCat(0,true);
+};
+openCat(0);
+}
+</script>
+</body>
+</html>

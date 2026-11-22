@@ -48,6 +48,7 @@ textarea{min-height:110px}.hint{color:var(--mut);font-size:14px;margin:4px 0 0}
 .ch button.added{background:#2f6f4f;color:#fff}
 #cAppr .chips button{background:#2a3d5c;font-size:14px;min-height:36px}#cAppr .chips button::after{content:" ✕";color:var(--red)}
 #cAppr>div{margin:4px 0 8px}
+#ptr{height:0;overflow:hidden;text-align:center;color:var(--mut);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:height .2s}
 header{position:sticky;padding-top:calc(env(safe-area-inset-top) + 14px)}
 .panel select{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid #33496b;background:#0f1b2d;color:var(--ink)}
 .hist{max-height:320px;overflow:auto;margin-top:8px}.hist div{padding:8px 0;border-top:1px solid #22344f;font-size:14px}.hist small{color:var(--mut);display:block}
@@ -64,6 +65,7 @@ header h1{margin-right:auto;order:1}
   <input id="q" type="search" placeholder="Pesquisar vídeos…" aria-label="Pesquisar">
   <button id="bPais" class="mini">Filtro Pais</button>
 </header>
+<div id="ptr">↓ Puxe para atualizar</div>
 <nav id="tabs"></nav>
 <p id="msg"></p>
 <main id="grid"></main>
@@ -386,6 +388,18 @@ $('fRes').addEventListener('click',e=>{
   $('cCats').value=lines.join('\n');refreshCats();
   b.textContent='Adicionado';b.classList.add('added');$('fMsg').textContent='Adicionado em “'+cat+'”. Toque de novo para retirar. Não esqueça de tocar em Salvar.';
 });
+{
+  let y0=null,dy=0;const ptr=$('ptr');
+  const busy=()=>document.querySelector('.ov.show');
+  addEventListener('touchstart',e=>{y0=(scrollY<=0&&!busy())?e.touches[0].clientY:null;dy=0},{passive:true});
+  addEventListener('touchmove',e=>{if(y0==null)return;dy=e.touches[0].clientY-y0;if(dy<=0){ptr.style.height='0';return}
+    ptr.style.transition='none';ptr.style.height=Math.min(dy/2,70)+'px';ptr.textContent=dy>140?'↻ Solte para atualizar':'↓ Puxe para atualizar'},{passive:true});
+  addEventListener('touchend',()=>{if(y0==null)return;ptr.style.transition='';
+    if(dy>140){ptr.textContent='Atualizando…';ptr.style.height='44px';
+      try{const c=cats()[cur];if(c&&feed[c.name]){feed[c.name].t=0;save('mt_feed2',feed)}}catch(e){}
+      setTimeout(()=>location.reload(),150)}
+    else ptr.style.height='0';y0=null});
+}
 openCat(0);
 }
 </script>

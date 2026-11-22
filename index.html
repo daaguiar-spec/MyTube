@@ -39,13 +39,17 @@ textarea{min-height:110px}.hint{color:var(--mut);font-size:14px;margin:4px 0 0}
 .ch img{width:48px;height:48px;border-radius:50%;flex:none;background:#22344f}
 .ch div{flex:1}.ch strong{display:block;line-height:1.3}.ch small{color:var(--mut);display:block;max-height:2.8em;overflow:hidden}
 .ch button.added{background:#2f6f4f;color:#fff}
+header{position:sticky}
+#bPais.mini{position:absolute;top:6px;right:max(4vw,14px);min-height:24px;padding:0 10px;font-size:11px;font-weight:700;background:transparent;border:1px solid #33496b;color:var(--mut)}
+header h1{margin-right:auto}
+@media(min-width:601px){#q{margin-right:110px}}
 </style>
 </head>
 <body>
 <header>
   <h1>My<b>Tube</b></h1>
   <input id="q" type="search" placeholder="Pesquisar vídeos…" aria-label="Pesquisar">
-  <button id="bPais">Pais</button>
+  <button id="bPais" class="mini">Filtro Pais</button>
 </header>
 <nav id="tabs"></nav>
 <p id="msg"></p>

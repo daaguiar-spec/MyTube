@@ -163,7 +163,7 @@ async function addDur(list){
   return list;
 }
 function usedNow(){if(used.d!==today())used={d:today(),s:0};return used.s}
-let cur=0, parent=false, playing=null;
+let cur=-1, parent=false, playing=null;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
 const cats=()=>cfg.cats.split('\n').map(l=>{const i=l.indexOf(':');if(i<0)return null;return{name:l.slice(0,i).trim(),ch:l.slice(i+1).split(',').map(s=>s.trim()).filter(Boolean)}}).filter(c=>c&&c.name);
@@ -216,12 +216,20 @@ function show(list,empty){
 }
 function tabs(){
   const cs=cats();
-  $('tabs').innerHTML=cs.map((c,i)=>`<button data-i="${i}" class="${i===cur?'on':''}">${esc(c.name)}</button>`).join('');
+  $('tabs').innerHTML=`<button data-i="-1" class="${cur===-1?'on':''}">Todos</button>`+cs.map((c,i)=>`<button data-i="${i}" class="${i===cur?'on':''}">${esc(c.name)}</button>`).join('');
 }
 async function openCat(i,force){
   cur=i;tabs();msg('');$('q').value='';
   const c=cats()[i];
   if(!cfg.key){show([],'Peça para um responsável configurar o app em “Filtro Pais”.');return}
+  if(i===-1){
+    if(!cats().length){show([],'Nenhuma categoria criada ainda.');return}
+    $('grid').innerHTML='<p style="color:var(--mut)">Carregando…</p>';
+    const seen=new Set(),all=[];
+    for(const k of cats())for(const v of await loadCat(k,force))if(!seen.has(v.id)){seen.add(v.id);all.push(v)}
+    all.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+    if(cur===-1)show(all);return;
+  }
   if(!c){show([],'Nenhuma categoria criada ainda.');return}
   $('grid').innerHTML='<p style="color:var(--mut)">Carregando…</p>';
   show(await loadCat(c,force));
@@ -289,7 +297,7 @@ $('cX').onclick=()=>{$('cfg').classList.remove('show')};
 $('cSave').onclick=()=>{
   cfg={key:$('cKey').value.trim(),cats:$('cCats').value,words:$('cWords').value,bch:$('cBch').value.trim(),open:$('cOpen').checked,pin:$('cPin').value.trim(),minDur:+$('cMin').value,maxDur:+$('cMax').value,limit:+$('cLim').value};
   save('mt_cfg',cfg);if(!timeUp())$('lock').classList.remove('show');
-  $('cfg').classList.remove('show');openCat(0,true);
+  $('cfg').classList.remove('show');openCat(-1,true);
 };
 $('cExp').onclick=async()=>{
   const code='MT1:'+btoa(unescape(encodeURIComponent(JSON.stringify(cfg))));
@@ -306,7 +314,7 @@ $('cImp').onclick=()=>{
     cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,pin:c.pin||'',minDur:c.minDur??181,maxDur:c.maxDur??0,limit:c.limit??0};
     save('mt_cfg',cfg);feed={};save('mt_feed2',feed);
     $('cMsg').textContent='Configuração aplicada!';
-    openCfg();openCat(0,true);
+    openCfg();openCat(-1,true);
   }catch(e){const v=$('cCode').value;$('cMsg').textContent='Código inválido ('+(e&&e.message||'formato')+'; '+v.length+' caracteres; começa com “'+v.trim().slice(0,6)+'”). Confira se copiou tudo, do começo (MT1:) ao fim.'}
 };
 const sugg={
@@ -396,12 +404,12 @@ $('fRes').addEventListener('click',e=>{
     ptr.style.transition='none';ptr.style.height=Math.min(dy/2,70)+'px';ptr.textContent=dy>140?'↻ Solte para atualizar':'↓ Puxe para atualizar'},{passive:true});
   addEventListener('touchend',()=>{if(y0==null)return;ptr.style.transition='';
     if(dy>140){ptr.textContent='Atualizando…';ptr.style.height='44px';
-      try{const c=cats()[cur];if(c&&feed[c.name]){feed[c.name].t=0;save('mt_feed2',feed)}}catch(e){}
+      try{(cur===-1?cats():[cats()[cur]]).forEach(c=>{if(c&&feed[c.name])feed[c.name].t=0});save('mt_feed2',feed)}catch(e){}
       try{sessionStorage.setItem('mt_cur',cur)}catch(e){}setTimeout(()=>location.reload(),150)}
     else ptr.style.height='0';y0=null});
 }
-let sc=0;try{sc=+sessionStorage.getItem('mt_cur')||0;sessionStorage.removeItem('mt_cur')}catch(e){}
-openCat(sc<cats().length?sc:0);
+let sc=-1;try{const v=sessionStorage.getItem('mt_cur');if(v!==null)sc=+v;sessionStorage.removeItem('mt_cur')}catch(e){}
+openCat(sc<cats().length?sc:-1);
 }
 </script>
 </body>

@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="SixSeven Tube">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261123191623">
+<meta name="mt-build" content="20261123191835">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -293,7 +293,7 @@ async function openCat(i,force){
   if(!force&&feed[c.name]&&feed[c.name].v.length)show(feed[c.name].v);else $('grid').innerHTML='<p style="color:var(--mut)">Carregando…</p>';
   const fresh=await loadCat(c,force);if(cur===i)show(fresh);
 }
-let homeSig='';
+let homeSig='';const learnSeed=Math.floor(Math.random()*4294967295)>>>0;
 function renderHome(lists){
     homeSig=lists.map(l=>l.map(v=>v.id).join()).join('|');
     const shelves=[];const pool=[];
@@ -306,13 +306,13 @@ function renderHome(lists){
     const seenL=new Set(),learn=[];shelves.filter(x=>isLearn(x.n)).forEach(x=>x.all.forEach(v=>{if(!seenL.has(v.id)){seenL.add(v.id);learn.push(v)}}));
     let learnHtml='';
     if(learn.length){
-      const day=today();let h=0;for(const ch of day)h=(h*31+ch.charCodeAt(0))>>>0;
+      let h=learnSeed;
       const rnd=()=>{h=(h*1103515245+12345)>>>0;return h/4294967296};
       const watched=new Set(hist.map(x=>x.id));
       const fresh=learn.filter(v=>!watched.has(v.id));const base=fresh.length?fresh:learn;
       const vd=base[Math.floor(rnd()*base.length)];
       const rest=learn.filter(v=>v.id!==vd.id).map(v=>[rnd(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]).slice(0,10);
-      learnHtml=`<div class="sec"><h3><i class="ti ti-bulb" style="color:var(--acc)"></i> Vídeo do dia para aprender</h3></div><div class="feat">${card(vd)}</div>`+(rest.length?sec('Aprenda algo novo',rest,null):'');
+      learnHtml=`<div class="sec"><h3><i class="ti ti-bulb" style="color:var(--acc)"></i> Sugestão para aprender</h3></div><div class="feat">${card(vd)}</div>`+(rest.length?sec('Aprenda algo novo',rest,null):'');
     }
     $('grid').className='home';
     $('grid').innerHTML=learnHtml+(cont.length?sec('Continuar assistindo',cont,null):'')+shelves.map(x=>sec('Novos em '+x.n,x.vs,x.k)).join('')||'<p class="hint" style="padding:0 max(4vw,14px)">Nenhum vídeo por aqui.</p>';

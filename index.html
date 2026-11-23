@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="SixSeven Tube">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261123121409">
+<meta name="mt-build" content="20261123191623">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -234,14 +234,15 @@ async function loadCat(c,force){
   const f=feed[c.name];
   if(!force&&f&&Date.now()-f.t<3600e3)return f.v;
   let all=[],errs=[];
-  for(const inp of c.ch){
+  const old=new Map(((f&&f.v)||[]).map(v=>[v.id,v.dur]));
+  await Promise.all(c.ch.map(async inp=>{
     try{
       const ch=await resolve(inp);
       const j=await yt('playlistItems',{part:'snippet',playlistId:ch.up,maxResults:15});
       all.push(...j.items.map(i=>({id:i.snippet.resourceId.videoId,title:i.snippet.title,desc:i.snippet.description,
-        ch:ch.title,chId:ch.id,thumb:(i.snippet.thumbnails.medium||i.snippet.thumbnails.default||{}).url,date:i.snippet.publishedAt})));
+        ch:ch.title,chId:ch.id,thumb:(i.snippet.thumbnails.medium||i.snippet.thumbnails.default||{}).url,date:i.snippet.publishedAt,dur:old.get(i.snippet.resourceId.videoId)})));
     }catch(e){errs.push(e.message)}
-  }
+  }));
   all.sort((a,b)=>b.date.localeCompare(a.date));
   await addDur(all);
   feed[c.name]={t:Date.now(),v:all};save('mt_feed2',feed);
@@ -278,10 +279,25 @@ async function openCat(i,force){
     $('grid').innerHTML=`<div class="cgrid" style="grid-column:1/-1;padding:0">${cats().map((c,k)=>`<button data-cat="${k}"><i class="ti ti-${icoFor(c.name)}"></i>${esc(c.name)}</button>`).join('')||'<p class="hint">Nenhuma categoria ainda.</p>'}</div>`;return}
   if(i===-1){
     if(!cats().length){show([],'Nenhuma categoria criada ainda.');return}
-    $('grid').className='home';$('grid').innerHTML='<p style="color:var(--mut);padding:0 max(4vw,14px)">Carregando…</p>';
-    const shelves=[];const pool=[];
-    for(const [k,c2] of cats().entries()){const vs=(await loadCat(c2,force)).filter(ok);pool.push(...vs);if(vs.length)shelves.push({k,n:c2.name,vs:vs.slice(0,10),all:vs})}
+    $('grid').className='home';
+    const hasCache=cats().some(c2=>feed[c2.name]&&feed[c2.name].v.length);
+    if(hasCache&&!force){renderHome(cats().map(c2=>(feed[c2.name]||{}).v||[]));}
+    else $('grid').innerHTML='<p style="color:var(--mut);padding:0 max(4vw,14px)">Carregando…</p>';
+    const lists=await Promise.all(cats().map(c2=>loadCat(c2,force)));
     if(cur!==-1)return;
+    const sig=lists.map(l=>l.map(v=>v.id).join()).join('|');
+    if(sig!==homeSig)renderHome(lists);
+    return;
+  }
+  if(!c){show([],'Nenhuma categoria criada ainda.');return}
+  if(!force&&feed[c.name]&&feed[c.name].v.length)show(feed[c.name].v);else $('grid').innerHTML='<p style="color:var(--mut)">Carregando…</p>';
+  const fresh=await loadCat(c,force);if(cur===i)show(fresh);
+}
+let homeSig='';
+function renderHome(lists){
+    homeSig=lists.map(l=>l.map(v=>v.id).join()).join('|');
+    const shelves=[];const pool=[];
+    cats().forEach((c2,k)=>{const vs=(lists[k]||[]).filter(ok);pool.push(...vs);if(vs.length)shelves.push({k,n:c2.name,vs:vs.slice(0,10),all:vs})});
     const vm=allVids();
     const cont=Object.entries(prog).filter(([id,p])=>p.d&&p.t>30&&p.t<p.d-20).sort((a,b)=>b[1].ts-a[1].ts).map(([id])=>vm.get(id)||(()=>{const h=hist.find(x=>x.id===id);return h?{id,title:h.t,ch:h.c}:null})()).filter(v=>v&&ok(v)).slice(0,10);
     lastList=pool;
@@ -298,12 +314,8 @@ async function openCat(i,force){
       const rest=learn.filter(v=>v.id!==vd.id).map(v=>[rnd(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]).slice(0,10);
       learnHtml=`<div class="sec"><h3><i class="ti ti-bulb" style="color:var(--acc)"></i> Vídeo do dia para aprender</h3></div><div class="feat">${card(vd)}</div>`+(rest.length?sec('Aprenda algo novo',rest,null):'');
     }
+    $('grid').className='home';
     $('grid').innerHTML=learnHtml+(cont.length?sec('Continuar assistindo',cont,null):'')+shelves.map(x=>sec('Novos em '+x.n,x.vs,x.k)).join('')||'<p class="hint" style="padding:0 max(4vw,14px)">Nenhum vídeo por aqui.</p>';
-    return;
-  }
-  if(!c){show([],'Nenhuma categoria criada ainda.');return}
-  $('grid').innerHTML='<p style="color:var(--mut)">Carregando…</p>';
-  show(await loadCat(c,force));
 }
 async function search(q){
   q=q.trim();if(!q)return openCat(cur);

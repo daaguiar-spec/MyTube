@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="SixSeven Tube">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261122172504">
+<meta name="mt-build" content="20261123120726">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -183,7 +183,7 @@ const API='https://www.googleapis.com/youtube/v3/';
 const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}};
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 let cfg=load('mt_cfg',{pin:'',key:'',open:false,
-  cats:'Ciência: @manualdomundo, @CienciaTodoDia\nCuriosidades: @nerdologia',
+  cats:'Ciência: @manualdomundo, @CienciaTodoDia',
   words:'+18, nsfw, terror, assustador, sangue, gore, sexy, aposta, apostas, bet, cassino, tigrinho, briga',
   bch:''});
 let nm=load('mt_nm',{}), chc=load('mt_ch',{}), feed=load('mt_feed2',{}), hist=load('mt_hist',[]);
@@ -415,29 +415,29 @@ $('cImp').onclick=()=>{
 };
 const sugg={
  'Ciência':['ciência para jovens','experimentos','astronomia','física divertida','química experimentos','biologia','dinossauros','corpo humano'],
- 'Curiosidades':['curiosidades','fatos incríveis','como as coisas funcionam','mistérios da história'],
+ 'Curiosidades':['curiosidades para crianças','como as coisas funcionam','você sabia para crianças'],
  'Educação':['matemática','português','história do Brasil','geografia','reforço escolar','aulas de ciências'],
  'Tecnologia':['programação para iniciantes','robótica','tecnologia','inteligência artificial explicada','eletrônica'],
- 'Games':['minecraft','roblox','fortnite','pokémon','jogos de lógica','speedrun','xadrez'],
- 'Esportes':['futebol','basquete','skate','vôlei','natação','artes marciais','surf','ciclismo'],
- 'Desafios e diversão':['mrbeast','desafios','youtubers brasileiros','pegadinhas leves','recordes mundiais'],
- 'Humor':['humor para família','animação engraçada','comédia infantil'],
- 'Desenhos e animação':['desenhos animados','animação','anime para crianças','stop motion'],
+ 'Games':['minecraft para crianças','roblox para crianças','pokémon','jogos de lógica','xadrez para crianças'],
+ 'Esportes':['futebol para crianças','basquete','skate','vôlei','natação','ciclismo'],
+ 'Desafios e diversão':['desafios para crianças','recordes mundiais','brincadeiras em família'],
+ 'Humor':['humor infantil','animação engraçada'],
+ 'Desenhos e animação':['desenhos animados','animação infantil','stop motion'],
  'Arte e desenho':['como desenhar','pintura','origami','artesanato','lettering'],
  'Música':['aprender violão','aprender piano','bateria','música','canto'],
  'Natureza e animais':['animais','vida selvagem','oceano','documentário natureza','pets'],
  'Culinária':['culinária fácil','receitas para crianças','confeitaria'],
  'Faça você mesmo':['faça você mesmo','lego','construções','marcenaria','invenções'],
  'Idiomas':['inglês para iniciantes','inglês para crianças','espanhol básico'],
- 'Livros e histórias':['livros para jovens','contação de histórias','resumo de livros'],
+ 'Livros e histórias':['livros infantojuvenis','contação de histórias'],
  'Viagens e mundo':['viagens','países do mundo','culturas'],
  'Carros e máquinas':['carros','aviões','trens','foguetes','máquinas gigantes'],
  'Mágica e truques':['mágica','truques de cartas','ilusões de ótica'],
- 'Saúde e esporte':['exercícios para jovens','yoga','alimentação saudável']
+ 'Saúde e esporte':['exercícios para crianças','yoga para crianças','alimentação saudável para crianças']
 };
 const rec={
- 'Ciência':['Manual do Mundo','Ciência Todo Dia','Nerdologia','Mark Rober','Kurzgesagt','Space Today','SciShow Kids','Brincando com Ideias'],
- 'Educação':['Khan Academy Brasil','Se Liga Nessa História','Gis com Giz','Professor Ferretto','Mairo Vergara'],
+ 'Ciência':['Manual do Mundo','Ciência Todo Dia','Mark Rober','Space Today','SciShow Kids','Brincando com Ideias'],
+ 'Educação':['Khan Academy Brasil','Se Liga Nessa História','Gis com Giz','Mairo Vergara'],
  'Games':['AuthenticGames','Athos','Robin Hood Gamer','Julia MineGirl'],
  'Esportes':['Dude Perfect'],
  'Arte e desenho':['Art for Kids Hub'],
@@ -446,7 +446,7 @@ const rec={
  'Culinária':['Tastemade Brasil'],
  'Desenhos e animação':['Turma da Mônica','Cartoon Network Brasil']
 };
-$('fChips').innerHTML='<details open style="width:100%"><summary style="cursor:pointer;font-weight:900;padding:6px 0;color:var(--acc)">Canais recomendados (até 13 anos)</summary><p class="hint">Canais conhecidos por conteúdo familiar. Toque no nome para buscar e confira antes de adicionar.</p>'+Object.entries(rec).map(([g,qs])=>`<div style="margin:6px 0"><small class="hint">${esc(g)}</small><div class="chips" style="padding:4px 0">${qs.map(x=>`<button data-q="${esc(x)}" data-g="${esc(g)}">${esc(x)}</button>`).join('')}</div></div>`).join('')+'</details><p class="hint" style="margin-top:12px;font-weight:700">Buscar por assunto</p>'+Object.entries(sugg).map(([g,qs])=>`<details style="width:100%"><summary style="cursor:pointer;font-weight:700;padding:6px 0">${esc(g)}</summary><div class="chips" style="padding:4px 0 8px">${qs.map(x=>`<button data-q="${esc(x)}" data-g="${esc(g)}">${esc(x)}</button>`).join('')}</div></details>`).join('');
+$('fChips').innerHTML='<details open style="width:100%"><summary style="cursor:pointer;font-weight:900;padding:6px 0;color:var(--acc)">Canais recomendados (até 12 anos)</summary><p class="hint">Canais conhecidos por conteúdo familiar. Toque no nome para buscar e confira antes de adicionar.</p>'+Object.entries(rec).map(([g,qs])=>`<div style="margin:6px 0"><small class="hint">${esc(g)}</small><div class="chips" style="padding:4px 0">${qs.map(x=>`<button data-q="${esc(x)}" data-g="${esc(g)}">${esc(x)}</button>`).join('')}</div></div>`).join('')+'</details><p class="hint" style="margin-top:12px;font-weight:700">Buscar por assunto</p>'+Object.entries(sugg).map(([g,qs])=>`<details style="width:100%"><summary style="cursor:pointer;font-weight:700;padding:6px 0">${esc(g)}</summary><div class="chips" style="padding:4px 0 8px">${qs.map(x=>`<button data-q="${esc(x)}" data-g="${esc(g)}">${esc(x)}</button>`).join('')}</div></details>`).join('');
 $('fChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('fQ').value=b.dataset.q;$('fCat').value=b.dataset.g;findCh()});
 $('fGo').onclick=findCh;$('fQ').addEventListener('keydown',e=>{if(e.key==='Enter')findCh()});
 function catNames(){return $('cCats').value.split('\n').map(l=>l.split(':')[0].trim()).filter(Boolean)}
@@ -467,19 +467,20 @@ function refreshCats(){renderAppr();$('fCats').innerHTML=catNames().map(n=>`<opt
 $('cCats').addEventListener('input',refreshCats);
 const fmt=n=>{n=+n;return n>=1e6?(n/1e6).toFixed(1).replace('.0','')+' mi':n>=1e3?Math.round(n/1e3)+' mil':String(n||0)};
 async function findCh(){
-  const q=$('fQ').value.trim();if(!q)return;
+  let q=$('fQ').value.trim();if(!q)return;
   const key=$('cKey').value.trim();if(!key){$('fMsg').textContent='Cole a chave da API primeiro.';return}
   cfg.key=key;$('fMsg').textContent='Buscando…';$('fRes').innerHTML='';
   try{
     const s=await yt('search',{part:'snippet',q,type:'channel',safeSearch:'strict',maxResults:15,regionCode:'BR',relevanceLanguage:'pt'});
     const ids=s.items.map(i=>i.snippet.channelId||i.id.channelId).filter(Boolean);
     if(!ids.length){$('fMsg').textContent='Nenhum canal encontrado.';return}
-    const c=await yt('channels',{part:'snippet,statistics',id:ids.join(',')});
+    const c=await yt('channels',{part:'snippet,statistics,status',id:ids.join(',')});
     const have=$('cCats').value.toLowerCase();
-    const list=c.items.sort((a,b)=>(+b.statistics.subscriberCount||0)-(+a.statistics.subscriberCount||0));
+    const kid=ch=>!!(ch.status&&ch.status.madeForKids);
+    const list=c.items.sort((a,b)=>(kid(b)-kid(a))||((+b.statistics.subscriberCount||0)-(+a.statistics.subscriberCount||0)));
     $('fMsg').textContent=list.length+' canais. Confira antes de adicionar.';
     $('fRes').innerHTML=list.map(ch=>{const h=ch.snippet.customUrl||ch.id;const done=have.includes(h.toLowerCase());
-      return `<div class="ch"><img loading="lazy" src="${esc((ch.snippet.thumbnails.default||{}).url)}" alt=""><div><strong>${esc(ch.snippet.title)}</strong><small>${fmt(ch.statistics.subscriberCount)} inscritos · ${esc(ch.snippet.description)}</small><a href="https://www.youtube.com/channel/${esc(ch.id)}" target="_blank" rel="noopener" style="color:var(--acc);font-size:14px">Ver canal</a></div><button data-h="${esc(h)}" class="${done?'added':''}">${done?'Adicionado':'Adicionar'}</button></div>`}).join('');
+      return `<div class="ch"><img loading="lazy" src="${esc((ch.snippet.thumbnails.default||{}).url)}" alt=""><div><strong>${esc(ch.snippet.title)}</strong>${kid(ch)?'<span style="display:inline-block;background:#2f6f4f;color:#fff;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;margin:2px 0">Feito para crianças</span>':''}<small>${fmt(ch.statistics.subscriberCount)} inscritos · ${esc(ch.snippet.description)}</small><a href="https://www.youtube.com/channel/${esc(ch.id)}" target="_blank" rel="noopener" style="color:var(--acc);font-size:14px">Ver canal</a></div><button data-h="${esc(h)}" class="${done?'added':''}">${done?'Adicionado':'Adicionar'}</button></div>`}).join('');
   }catch(e){$('fMsg').textContent='Erro: '+e.message}
 }
 $('fRes').addEventListener('click',e=>{

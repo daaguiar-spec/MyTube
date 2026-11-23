@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="SixSeven Tube">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261123120726">
+<meta name="mt-build" content="20261123121409">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -60,6 +60,7 @@ body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 .th{position:relative}.du{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.8);color:#fff;font-size:12px;font-weight:700;padding:1px 6px;border-radius:5px}
 .pb{position:absolute;left:0;bottom:0;height:4px;background:var(--acc)}
 #grid.home{display:block;padding:0 0 12px}
+.feat{padding:0 max(4vw,14px)}.feat .v{border:2px solid var(--acc)}.feat .v strong{font-size:18px}.sec h3 i{vertical-align:-2px}
 .sec{display:flex;justify-content:space-between;align-items:baseline;padding:18px max(4vw,14px) 8px}.sec h3{margin:0;font-size:18px}
 .sec button{background:none;color:var(--acc);min-height:32px;padding:0 4px;font-size:14px}
 .shelf{display:flex;gap:12px;overflow-x:auto;padding:0 max(4vw,14px) 6px;scroll-snap-type:x mandatory;scrollbar-width:none}.shelf::-webkit-scrollbar{display:none}
@@ -279,13 +280,25 @@ async function openCat(i,force){
     if(!cats().length){show([],'Nenhuma categoria criada ainda.');return}
     $('grid').className='home';$('grid').innerHTML='<p style="color:var(--mut);padding:0 max(4vw,14px)">Carregando…</p>';
     const shelves=[];const pool=[];
-    for(const [k,c2] of cats().entries()){const vs=(await loadCat(c2,force)).filter(ok);pool.push(...vs);if(vs.length)shelves.push({k,n:c2.name,vs:vs.slice(0,10)})}
+    for(const [k,c2] of cats().entries()){const vs=(await loadCat(c2,force)).filter(ok);pool.push(...vs);if(vs.length)shelves.push({k,n:c2.name,vs:vs.slice(0,10),all:vs})}
     if(cur!==-1)return;
     const vm=allVids();
     const cont=Object.entries(prog).filter(([id,p])=>p.d&&p.t>30&&p.t<p.d-20).sort((a,b)=>b[1].ts-a[1].ts).map(([id])=>vm.get(id)||(()=>{const h=hist.find(x=>x.id===id);return h?{id,title:h.t,ch:h.c}:null})()).filter(v=>v&&ok(v)).slice(0,10);
     lastList=pool;
     const sec=(t,vs,k)=>`<div class="sec"><h3>${esc(t)}</h3>${k!=null?`<button data-cat="${k}">Ver tudo</button>`:''}</div><div class="shelf">${vs.map(card).join('')}</div>`;
-    $('grid').innerHTML=(cont.length?sec('Continuar assistindo',cont,null):'')+shelves.map(x=>sec('Novos em '+x.n,x.vs,x.k)).join('')||'<p class="hint" style="padding:0 max(4vw,14px)">Nenhum vídeo por aqui.</p>';
+    const isLearn=n=>/cienc|educ|escol|idiom|ingles|espanh|tecn|program|histor|matem|curios|livro|natur|geogr|aprend|aula/.test(norm(n));
+    const seenL=new Set(),learn=[];shelves.filter(x=>isLearn(x.n)).forEach(x=>x.all.forEach(v=>{if(!seenL.has(v.id)){seenL.add(v.id);learn.push(v)}}));
+    let learnHtml='';
+    if(learn.length){
+      const day=today();let h=0;for(const ch of day)h=(h*31+ch.charCodeAt(0))>>>0;
+      const rnd=()=>{h=(h*1103515245+12345)>>>0;return h/4294967296};
+      const watched=new Set(hist.map(x=>x.id));
+      const fresh=learn.filter(v=>!watched.has(v.id));const base=fresh.length?fresh:learn;
+      const vd=base[Math.floor(rnd()*base.length)];
+      const rest=learn.filter(v=>v.id!==vd.id).map(v=>[rnd(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]).slice(0,10);
+      learnHtml=`<div class="sec"><h3><i class="ti ti-bulb" style="color:var(--acc)"></i> Vídeo do dia para aprender</h3></div><div class="feat">${card(vd)}</div>`+(rest.length?sec('Aprenda algo novo',rest,null):'');
+    }
+    $('grid').innerHTML=learnHtml+(cont.length?sec('Continuar assistindo',cont,null):'')+shelves.map(x=>sec('Novos em '+x.n,x.vs,x.k)).join('')||'<p class="hint" style="padding:0 max(4vw,14px)">Nenhum vídeo por aqui.</p>';
     return;
   }
   if(!c){show([],'Nenhuma categoria criada ainda.');return}

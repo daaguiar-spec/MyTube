@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="SixSeven Tube">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261123211550">
+<meta name="mt-build" content="20261123221607">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -74,6 +74,7 @@ body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 .cgrid button{background:var(--card);border-radius:14px;min-height:96px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:14px;text-align:left;font-size:16px}
 .cgrid i{font-size:28px;color:var(--acc)}
 #bPais.mini i{font-size:13px}
+.acct{background:#0f1b2d;border-radius:12px;padding:14px;margin-bottom:8px}
 #hello{display:none;align-items:center;gap:14px;padding:14px max(4vw,14px) 0}
 #hello img,#hello>i{width:68px;height:68px;border-radius:50%;border:3px solid var(--acc);object-fit:cover;flex:none;background:#185FA5}
 #hello>i{display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff}
@@ -138,6 +139,22 @@ header h1{margin-right:auto;order:1}
 
 <div class="ov" id="cfg"><div class="panel">
   <h2 style="margin-top:0">Configurações dos pais</h2>
+  <div class="acct" id="acct">
+    <label style="margin-top:0">Conta da família</label>
+    <div id="acOut">
+      <p class="hint">Entre com sua conta para guardar as configurações na nuvem. Em outro aparelho, é só entrar com o mesmo e-mail e senha.</p>
+      <input id="acEmail" type="email" placeholder="seu@email.com" autocomplete="username" style="margin-top:8px">
+      <input id="acPass" type="password" placeholder="Senha (mínimo 6 caracteres)" autocomplete="current-password" style="margin-top:8px">
+      <div class="row"><button class="pri" id="acIn" type="button">Entrar</button><button id="acNew" type="button">Criar conta</button><button id="acG" type="button">Entrar com Google</button></div>
+      <button id="acReset" type="button" style="background:none;color:var(--mut);min-height:32px;padding:0;margin-top:6px;font-size:14px">Esqueci a senha</button>
+    </div>
+    <div id="acInBox" style="display:none">
+      <p style="margin:6px 0"><i class="ti ti-cloud-check" style="color:#4ade80"></i> Conectado como <b id="acWho"></b></p>
+      <p class="hint" id="acSync"></p>
+      <div class="row"><button id="acOutBtn" type="button">Sair da conta</button></div>
+    </div>
+    <p class="hint" id="acMsg"></p>
+  </div>
   <label for="cName">Nome do seu filho</label>
   <input id="cName" placeholder="Nome ou apelido" autocomplete="off">
   <label for="cAva">Foto do perfil</label>
@@ -420,6 +437,26 @@ $('cAva').addEventListener('change',()=>{const f=$('cAva').files[0];if(!f)return
     const m=Math.min(im.width,im.height);x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,S,S);
     const d=c.toDataURL('image/jpeg',.85);try{localStorage.setItem('mt_avatar',d)}catch(e){}$('cAvaPrev').src=d;hello()};im.src=r.result};r.readAsDataURL(f)});
 $('cAvaRm').onclick=()=>{try{localStorage.removeItem('mt_avatar')}catch(e){}$('cAvaPrev').src='';$('cAva').value='';hello()};
+function cloudData(){let av='';try{av=localStorage.getItem('mt_avatar')||''}catch(e){}return {cfg,avatar:av,updatedAt:Date.now()}}
+function cloudPush(){if(window.fb&&fb.user){const d=cloudData();save('mt_cfg_ts',d.updatedAt);fb.push(d).then(()=>acStatus('Configurações salvas na nuvem.')).catch(e=>acStatus('Não consegui salvar na nuvem: '+fb.err(e)))}}
+function acStatus(t){$('acSync').textContent=t}
+window.mtApi={
+  local:()=>({...cloudData(),updatedAt:load('mt_cfg_ts',0)}),
+  apply:d=>{if(!d||!d.cfg)return;const oldCats=cfg.cats;
+    cfg={...cfg,...d.cfg};save('mt_cfg',cfg);save('mt_cfg_ts',d.updatedAt||Date.now());
+    try{if(d.avatar)localStorage.setItem('mt_avatar',d.avatar);else localStorage.removeItem('mt_avatar')}catch(e){}
+    if(oldCats!==cfg.cats){feed={};save('mt_feed2',feed)}
+    if($('cfg').classList.contains('show'))openCfg();
+    if(!document.querySelector('.ov.show'))openCat(cur);else tabs();},
+  push:cloudPush,
+  ui:u=>{$('acOut').style.display=u?'none':'';$('acInBox').style.display=u?'':'none';if(u)$('acWho').textContent=u.email||'';},
+  msg:t=>{$('acMsg').textContent=t}
+};
+$('acIn').onclick=()=>window.fb?fb.signIn($('acEmail').value.trim(),$('acPass').value):mtApi.msg('Carregando… tente de novo em instantes.');
+$('acNew').onclick=()=>window.fb?fb.signUp($('acEmail').value.trim(),$('acPass').value):mtApi.msg('Carregando… tente de novo em instantes.');
+$('acG').onclick=()=>window.fb&&fb.google();
+$('acReset').onclick=()=>window.fb&&fb.reset($('acEmail').value.trim());
+$('acOutBtn').onclick=()=>window.fb&&fb.out();
 $('bPais').onclick=askPin;$('lockP').onclick=askPin;
 $('cHistClr').onclick=()=>{hist=[];save('mt_hist',hist);renderHist()};
 $('pinX').onclick=()=>$('pin').classList.remove('show');
@@ -441,6 +478,7 @@ $('cX').onclick=()=>{$('cfg').classList.remove('show');parent=false};
 $('cSave').onclick=()=>{
   cfg={key:$('cKey').value.trim(),cats:$('cCats').value,words:$('cWords').value,bch:$('cBch').value.trim(),open:$('cOpen').checked,pin:(validPin($('cPin').value.trim())?$('cPin').value.trim():cfg.pin),minDur:+$('cMin').value,maxDur:+$('cMax').value,limit:+$('cLim').value,kidName:$('cName').value.trim()};
   save('mt_cfg',cfg);if(!timeUp())$('lock').classList.remove('show');
+  cloudPush();
   $('cfg').classList.remove('show');parent=false;openCat(-1,true);
 };
 $('cExp').onclick=async()=>{
@@ -563,6 +601,44 @@ try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js')}ca
 let sc=-1;try{const v=sessionStorage.getItem('mt_cur');if(v!==null)sc=+v;sessionStorage.removeItem('mt_cur')}catch(e){}
 openCat(sc<cats().length?sc:-1);
 }
+</script>
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,GoogleAuthProvider,signInWithPopup,signInWithRedirect,sendPasswordResetEmail} from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
+import {getFirestore,doc,getDoc,setDoc,onSnapshot} from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js';
+const app=initializeApp({
+  apiKey:"AIzaSyDniezmwJ-Z1aH5RNqnS1BiwIyQVhEDPJ8",
+  authDomain:"personaltube-2e3f3.firebaseapp.com",
+  projectId:"personaltube-2e3f3",
+  storageBucket:"personaltube-2e3f3.firebasestorage.app",
+  messagingSenderId:"105452007935",
+  appId:"1:105452007935:web:ca613f99e393bb50bd37ca"
+});
+const auth=getAuth(app),db=getFirestore(app);
+const M={'auth/invalid-email':'E-mail inválido.','auth/invalid-credential':'E-mail ou senha incorretos.','auth/wrong-password':'E-mail ou senha incorretos.','auth/user-not-found':'Conta não encontrada. Toque em Criar conta.','auth/email-already-in-use':'Esse e-mail já tem conta. Toque em Entrar.','auth/weak-password':'A senha precisa ter pelo menos 6 caracteres.','auth/too-many-requests':'Muitas tentativas. Espere alguns minutos.','auth/network-request-failed':'Sem internet.','auth/popup-blocked':'O navegador bloqueou a janela do Google.','auth/unauthorized-domain':'Domínio não autorizado no Firebase.','auth/api-key-not-valid.-please-pass-a-valid-api-key.':'Chave do Firebase inválida.','permission-denied':'Sem permissão no banco de dados (confira as regras).'};
+const err=e=>M[e&&e.code]||((e&&e.code)||'')+' '+((e&&e.message)||'');
+let unsub=null;
+const ref=u=>doc(db,'familias',u.uid);
+window.fb={user:null,err,
+  push:d=>fb.user?setDoc(ref(fb.user),d):Promise.resolve(),
+  signIn:(e,p)=>signInWithEmailAndPassword(auth,e,p).catch(x=>mtApi.msg(err(x))),
+  signUp:(e,p)=>createUserWithEmailAndPassword(auth,e,p).catch(x=>mtApi.msg(err(x))),
+  google:()=>{const pr=new GoogleAuthProvider();const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+    (standalone?signInWithRedirect(auth,pr):signInWithPopup(auth,pr)).catch(x=>mtApi.msg(err(x)))},
+  reset:e=>{if(!e){mtApi.msg('Digite seu e-mail acima primeiro.');return}sendPasswordResetEmail(auth,e).then(()=>mtApi.msg('Enviamos um e-mail para redefinir a senha.')).catch(x=>mtApi.msg(err(x)))},
+  out:()=>signOut(auth)
+};
+onAuthStateChanged(auth,async u=>{
+  fb.user=u;if(unsub){unsub();unsub=null}
+  const go=()=>{mtApi.ui(u);if(!u)return;mtApi.msg('');
+    getDoc(ref(u)).then(s=>{
+      const loc=mtApi.local();
+      if(s.exists()){const d=s.data();if((d.updatedAt||0)>=(loc.updatedAt||0))mtApi.apply(d);else mtApi.push()}
+      else mtApi.push();
+      unsub=onSnapshot(ref(u),s2=>{if(!s2.exists())return;const d=s2.data();if((d.updatedAt||0)>(mtApi.local().updatedAt||0))mtApi.apply(d)});
+    }).catch(x=>mtApi.msg(err(x)));};
+  if(window.mtApi)go();else addEventListener('load',go);
+});
 </script>
 </body>
 </html>

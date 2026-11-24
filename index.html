@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="SixSeven Tube">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261123191835">
+<meta name="mt-build" content="20261123211550">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -74,6 +74,11 @@ body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 .cgrid button{background:var(--card);border-radius:14px;min-height:96px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:14px;text-align:left;font-size:16px}
 .cgrid i{font-size:28px;color:var(--acc)}
 #bPais.mini i{font-size:13px}
+#hello{display:none;align-items:center;gap:14px;padding:14px max(4vw,14px) 0}
+#hello img,#hello>i{width:68px;height:68px;border-radius:50%;border:3px solid var(--acc);object-fit:cover;flex:none;background:#185FA5}
+#hello>i{display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff}
+#hello b{display:block;font-size:22px;font-weight:900;line-height:1.2}#hello small{color:var(--mut);font-size:14px}
+.avp{display:flex;align-items:center;gap:12px;margin-top:8px}.avp img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--acc);background:#22344f}
 #ptr{height:0;overflow:hidden;text-align:center;color:var(--mut);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:height .2s}
 header{position:sticky;padding-top:calc(env(safe-area-inset-top) + 14px)}
 .panel select{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid #33496b;background:#0f1b2d;color:var(--ink)}
@@ -92,6 +97,7 @@ header h1{margin-right:auto;order:1}
   <button id="bPais" class="mini" aria-label="Filtro Pais"><i class="ti ti-lock"></i> Pais</button>
 </header>
 <div id="ptr">↓ Puxe para atualizar</div>
+<div id="hello"><img id="helloImg" alt=""><i id="helloIco" class="ti ti-user"></i><div><b id="helloT"></b><small id="helloS"></small></div></div>
 <div id="tbar"><div><span>Tempo de hoje</span><span id="tbarT"></span></div><div class="bar"><i id="tbarF"></i></div></div>
 <nav id="tabs"></nav>
 <p id="msg"></p>
@@ -132,6 +138,11 @@ header h1{margin-right:auto;order:1}
 
 <div class="ov" id="cfg"><div class="panel">
   <h2 style="margin-top:0">Configurações dos pais</h2>
+  <label for="cName">Nome do seu filho</label>
+  <input id="cName" placeholder="Nome ou apelido" autocomplete="off">
+  <label for="cAva">Foto do perfil</label>
+  <div class="avp"><img id="cAvaPrev" alt=""><input id="cAva" type="file" accept="image/*" style="flex:1"><button id="cAvaRm" type="button">Remover</button></div>
+  <p class="hint">A foto fica salva só neste aparelho. Ela não vai para a internet.</p>
   <label for="cKey">Chave da API do YouTube</label>
   <input id="cKey" placeholder="AIza…">
   <p class="hint">Gratuita, criada no Google Cloud (YouTube Data API v3).</p>
@@ -334,7 +345,14 @@ async function search(q){
   }catch(e){msg('Erro na busca: '+e.message)}
 }
 function timeUp(){return lim()&&usedNow()>=lim()*60}
-function tbar(){const on=!!lim()&&cur>=-1;$('tbar').style.display=on?'block':'none';if(!on)return;const left=Math.max(0,lim()*60-usedNow());$('tbarT').textContent=Math.ceil(left/60)+' min restantes';$('tbarF').style.width=Math.round(left/(lim()*60)*100)+'%'}
+function hello(){
+  const n=(cfg.kidName||'').trim();let av='';try{av=localStorage.getItem('mt_avatar')||''}catch(e){}
+  const on=(n||av)&&cur>=-1;$('hello').style.display=on?'flex':'none';if(!on)return;
+  $('helloImg').style.display=av?'':'none';if(av)$('helloImg').src=av;$('helloIco').style.display=av?'none':'flex';
+  const h=new Date().getHours();const g=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+  $('helloT').textContent=n?'Oi, '+n+'!':'Oi!';$('helloS').textContent=g+'. O que vamos ver hoje?';
+}
+function tbar(){hello();const on=!!lim()&&cur>=-1;$('tbar').style.display=on?'block':'none';if(!on)return;const left=Math.max(0,lim()*60-usedNow());$('tbarT').textContent=Math.ceil(left/60)+' min restantes';$('tbarF').style.width=Math.round(left/(lim()*60)*100)+'%'}
 function showLeft(){tbar();$('left').textContent=lim()?'Tempo restante hoje: '+Math.max(0,Math.ceil((lim()*60-usedNow())/60))+' min':''}
 function play(id,title,chId,chName){
   if(timeUp()){$('lock').classList.add('show');return}
@@ -372,7 +390,7 @@ function renderHist(){
 }
 function openCfg(){
   $('cMin').value=String(minD());$('cMax').value=String(maxD());$('cLim').value=String(lim());renderHist();
-  $('cKey').value=cfg.key;$('cCats').value=cfg.cats;$('cWords').value=cfg.words;$('cBch').value=cfg.bch;$('cOpen').checked=cfg.open;$('cPin').value='';
+  $('cKey').value=cfg.key;$('cCats').value=cfg.cats;$('cWords').value=cfg.words;$('cBch').value=cfg.bch;$('cOpen').checked=cfg.open;$('cPin').value='';$('cName').value=cfg.kidName||'';$('cAva').value='';try{$('cAvaPrev').src=localStorage.getItem('mt_avatar')||''}catch(e){}
   $('cfg').classList.add('show');refreshCats();
 }
 const validPin=p=>/^\d{4,8}$/.test(p);
@@ -397,6 +415,11 @@ $('bFav').onclick=()=>{if(!playing)return;const i=favs.findIndex(f=>f.id===playi
   if(i>=0)favs.splice(i,1);else{const v=allVids().get(playing.id);if(v)favs.unshift(v)}
   save('mt_favs',favs);favBtn();};
 $('bBloq').onclick=()=>{if(!playing)return;cfg.bch=(cfg.bch+' '+playing.chId).trim();save('mt_cfg',cfg);closePlayer();openCat(cur)};
+$('cAva').addEventListener('change',()=>{const f=$('cAva').files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{const im=new Image();im.onload=()=>{const S=256,c=document.createElement('canvas');c.width=c.height=S;const x=c.getContext('2d');
+    const m=Math.min(im.width,im.height);x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,S,S);
+    const d=c.toDataURL('image/jpeg',.85);try{localStorage.setItem('mt_avatar',d)}catch(e){}$('cAvaPrev').src=d;hello()};im.src=r.result};r.readAsDataURL(f)});
+$('cAvaRm').onclick=()=>{try{localStorage.removeItem('mt_avatar')}catch(e){}$('cAvaPrev').src='';$('cAva').value='';hello()};
 $('bPais').onclick=askPin;$('lockP').onclick=askPin;
 $('cHistClr').onclick=()=>{hist=[];save('mt_hist',hist);renderHist()};
 $('pinX').onclick=()=>$('pin').classList.remove('show');
@@ -416,7 +439,7 @@ $('pinOk').onclick=()=>{
 $('pinIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinOk').click()});$('pinIn2').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinOk').click()});
 $('cX').onclick=()=>{$('cfg').classList.remove('show');parent=false};
 $('cSave').onclick=()=>{
-  cfg={key:$('cKey').value.trim(),cats:$('cCats').value,words:$('cWords').value,bch:$('cBch').value.trim(),open:$('cOpen').checked,pin:(validPin($('cPin').value.trim())?$('cPin').value.trim():cfg.pin),minDur:+$('cMin').value,maxDur:+$('cMax').value,limit:+$('cLim').value};
+  cfg={key:$('cKey').value.trim(),cats:$('cCats').value,words:$('cWords').value,bch:$('cBch').value.trim(),open:$('cOpen').checked,pin:(validPin($('cPin').value.trim())?$('cPin').value.trim():cfg.pin),minDur:+$('cMin').value,maxDur:+$('cMax').value,limit:+$('cLim').value,kidName:$('cName').value.trim()};
   save('mt_cfg',cfg);if(!timeUp())$('lock').classList.remove('show');
   $('cfg').classList.remove('show');parent=false;openCat(-1,true);
 };
@@ -432,7 +455,7 @@ $('cImp').onclick=()=>{
     t=t.replace(/-/g,'+').replace(/_/g,'/').replace(/[^A-Za-z0-9+\/]/g,'');while(t.length%4)t+='=';
     const bin=atob(t);const c=JSON.parse(new TextDecoder().decode(Uint8Array.from(bin,ch=>ch.charCodeAt(0))));
     if(typeof c.cats!=='string')throw 0;
-    cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,pin:validPin(c.pin||'')?c.pin:cfg.pin,minDur:c.minDur??181,maxDur:c.maxDur??0,limit:c.limit??0};
+    cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,pin:validPin(c.pin||'')?c.pin:cfg.pin,minDur:c.minDur??181,maxDur:c.maxDur??0,limit:c.limit??0,kidName:c.kidName||cfg.kidName||''};
     save('mt_cfg',cfg);feed={};save('mt_feed2',feed);
     $('cMsg').textContent='Configuração aplicada!';
     openCfg();openCat(-1,true);

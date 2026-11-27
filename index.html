@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="SixSeven Tube">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127094957">
+<meta name="mt-build" content="20261127095330">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -137,6 +137,17 @@ header h1{margin-right:auto;order:1}
   <ul id="lockIdeas" style="text-align:left;line-height:1.5;margin:12px 0;padding-left:22px"></ul>
   <p class="hint">Volte amanhã para assistir mais.</p>
   <div class="row" style="justify-content:center"><button id="lockP">Filtro Pais</button></div>
+</div></div>
+
+<div class="ov" id="pay"><div class="panel" style="text-align:center;margin-top:10vh;max-width:440px">
+  <i class="ti ti-shield-check" style="font-size:56px;color:var(--acc)"></i>
+  <h2 id="payT">Assinatura necessária</h2>
+  <p class="hint" id="payTxt" style="font-size:16px"></p>
+  <div class="row" style="justify-content:center;flex-direction:column;align-items:stretch">
+    <a id="payBuy" class="pri" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:999px;background:var(--acc);color:#1a1300;font-weight:900;text-decoration:none">Assinar agora</a>
+    <button id="payLogin">Entrar na conta da família</button>
+  </div>
+  <p class="hint" style="margin-top:12px">Já assinou? Entre com o mesmo e-mail usado na compra.</p>
 </div></div>
 
 <div class="ov" id="pin"><div class="panel" style="max-width:380px;margin-top:10vh">
@@ -507,7 +518,25 @@ $('cAvaRm').onclick=()=>{try{localStorage.removeItem('mt_avatar')}catch(e){}$('c
 function cloudData(){let av='';try{av=localStorage.getItem('mt_avatar')||''}catch(e){}return {cfg,avatar:av,updatedAt:Date.now()}}
 function cloudPush(){if(window.fb&&fb.user){const d=cloudData();save('mt_cfg_ts',d.updatedAt);fb.push(d).then(()=>acStatus('Configurações salvas na nuvem.')).catch(e=>acStatus('Não consegui salvar na nuvem: '+fb.err(e)))}}
 function acStatus(t){$('acSync').textContent=t}
+const PAYWALL=false, CHECKOUT_URL='', ADMINS=['daaguiar@gmail.com'];
+let subInfo={loaded:false,data:null,user:null};
+function payCheck(){
+  if(!PAYWALL||!SERVER){$('pay').classList.remove('show');return}
+  if($('cfg').classList.contains('show')||$('pin').classList.contains('show'))return;
+  const u=subInfo.user, adm=u&&ADMINS.includes((u.email||'').toLowerCase());
+  const ok=adm||(subInfo.data&&subInfo.data.status==='ativa');
+  if(u&&!subInfo.loaded)return;
+  if(ok){$('pay').classList.remove('show');return}
+  $('payBuy').href=CHECKOUT_URL||'#';
+  $('payLogin').style.display=u?'none':'';
+  $('payT').textContent=!u?'Bem-vindo ao SixSeven Tube':subInfo.data&&subInfo.data.status==='atrasada'?'Pagamento pendente':'Assinatura necessária';
+  $('payTxt').textContent=!u?'Assine para liberar o app ou entre na conta da família se você já assinou.':subInfo.data&&subInfo.data.status==='atrasada'?'Há um pagamento em aberto. Regularize na Kiwify para continuar usando.':'Não encontramos uma assinatura ativa para '+(u.email||'esta conta')+'.';
+  $('pay').classList.add('show');
+}
+$('payLogin').onclick=()=>{$('pay').classList.remove('show');askPin()};
 window.mtApi={
+  sub:(u,d)=>{subInfo={loaded:true,data:d,user:u};payCheck()},
+  noUser:()=>{subInfo={loaded:true,data:null,user:null};payCheck()},
   local:()=>({...cloudData(),updatedAt:load('mt_cfg_ts',0)}),
   apply:d=>{if(!d||!d.cfg)return;const oldCats=cfg.cats;
     cfg={...cfg,...d.cfg};save('mt_cfg',cfg);save('mt_cfg_ts',d.updatedAt||Date.now());
@@ -530,7 +559,7 @@ applyTheme();checkMedals();
 if(SERVER)$('cKeyH').textContent='Opcional. Deixe em branco para usar o servidor do app.';
 $('bPais').onclick=askPin;$('lockP').onclick=askPin;
 $('cHistClr').onclick=()=>{hist=[];save('mt_hist',hist);renderHist()};
-$('pinX').onclick=()=>$('pin').classList.remove('show');
+$('pinX').onclick=()=>{$('pin').classList.remove('show');payCheck()};
 $('pinOk').onclick=()=>{
   const a=$('pinIn').value.trim();
   if(!validPin(cfg.pin||'')){
@@ -545,12 +574,12 @@ $('pinOk').onclick=()=>{
     $('pinErr').textContent=l.until>Date.now()?'Muitas tentativas. Bloqueado por 5 minutos.':'PIN incorreto.'}
 };
 $('pinIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinOk').click()});$('pinIn2').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinOk').click()});
-$('cX').onclick=()=>{$('cfg').classList.remove('show');parent=false};
+$('cX').onclick=()=>{$('cfg').classList.remove('show');parent=false;payCheck()};
 $('cSave').onclick=()=>{
   cfg={key:$('cKey').value.trim(),cats:$('cCats').value,words:$('cWords').value,bch:$('cBch').value.trim(),open:$('cOpen').checked,pin:(validPin($('cPin').value.trim())?$('cPin').value.trim():cfg.pin),minDur:+$('cMin').value,maxDur:+$('cMax').value,limit:+$('cLim').value,kidName:$('cName').value.trim()};
   save('mt_cfg',cfg);if(!timeUp())$('lock').classList.remove('show');
   cloudPush();
-  $('cfg').classList.remove('show');parent=false;openCat(-1,true);
+  $('cfg').classList.remove('show');parent=false;openCat(-1,true);payCheck();
 };
 $('cExp').onclick=async()=>{
   const code='MT1:'+btoa(unescape(encodeURIComponent(JSON.stringify(cfg))));
@@ -688,7 +717,7 @@ const app=initializeApp({
 const auth=getAuth(app),db=getFirestore(app);
 const M={'auth/invalid-email':'E-mail inválido.','auth/invalid-credential':'E-mail ou senha incorretos.','auth/wrong-password':'E-mail ou senha incorretos.','auth/user-not-found':'Conta não encontrada. Toque em Criar conta.','auth/email-already-in-use':'Esse e-mail já tem conta. Toque em Entrar.','auth/weak-password':'A senha precisa ter pelo menos 6 caracteres.','auth/too-many-requests':'Muitas tentativas. Espere alguns minutos.','auth/network-request-failed':'Sem internet.','auth/popup-blocked':'O navegador bloqueou a janela do Google.','auth/unauthorized-domain':'Domínio não autorizado no Firebase.','auth/api-key-not-valid.-please-pass-a-valid-api-key.':'Chave do Firebase inválida.','permission-denied':'Sem permissão no banco de dados (confira as regras).'};
 const err=e=>M[e&&e.code]||((e&&e.code)||'')+' '+((e&&e.message)||'');
-let unsub=null;
+let unsub=null,unsubSub=null;
 const ref=u=>doc(db,'familias',u.uid);
 window.fb={user:null,err,
   push:d=>fb.user?setDoc(ref(fb.user),d):Promise.resolve(),
@@ -700,8 +729,9 @@ window.fb={user:null,err,
   out:()=>signOut(auth)
 };
 onAuthStateChanged(auth,async u=>{
-  fb.user=u;if(unsub){unsub();unsub=null}
-  const go=()=>{mtApi.ui(u);if(!u)return;mtApi.msg('');
+  fb.user=u;if(unsub){unsub();unsub=null}if(unsubSub){unsubSub();unsubSub=null}
+  const go=()=>{mtApi.ui(u);if(!u){mtApi.noUser();return}mtApi.msg('');
+    unsubSub=onSnapshot(doc(db,'assinaturas',(u.email||'').toLowerCase()),s=>mtApi.sub(u,s.exists()?s.data():null),()=>mtApi.sub(u,null));
     getDoc(ref(u)).then(s=>{
       const loc=mtApi.local();
       if(s.exists()){const d=s.data();if((d.updatedAt||0)>=(loc.updatedAt||0))mtApi.apply(d);else mtApi.push()}

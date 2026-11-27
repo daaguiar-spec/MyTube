@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="SixSeven Tube">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261123221607">
+<meta name="mt-build" content="20261126215823">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -67,7 +67,7 @@ body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 .shelf .v{flex:none;width:min(62vw,260px);scroll-snap-align:start}
 #tbar{display:none;padding:10px max(4vw,14px) 0;font-size:13px;color:var(--mut)}#tbar>div:first-child{display:flex;justify-content:space-between}
 #tbar .bar{height:6px;background:#22344f;border-radius:3px;margin-top:5px;overflow:hidden}#tbar .bar i{display:block;height:100%;background:var(--acc);border-radius:3px}
-#bnav{position:fixed;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:repeat(4,1fr);background:#0b1422;border-top:1px solid #1d2d47;padding:4px 0 calc(4px + env(safe-area-inset-bottom))}
+#bnav{position:fixed;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:repeat(5,1fr);background:#0b1422;border-top:1px solid #1d2d47;padding:4px 0 calc(4px + env(safe-area-inset-bottom))}
 #bnav button{background:none;border-radius:0;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;color:var(--mut);padding:0}
 #bnav i{font-size:22px}#bnav button.on{color:var(--acc)}
 .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:12px max(4vw,14px)}
@@ -75,6 +75,14 @@ body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 .cgrid i{font-size:28px;color:var(--acc)}
 #bPais.mini i{font-size:13px}
 .acct{background:#0f1b2d;border-radius:12px;padding:14px;margin-bottom:8px}
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);opacity:0;z-index:20;background:#22344f;border:2px solid var(--acc);color:var(--ink);padding:12px 16px;border-radius:16px;font-weight:700;display:flex;gap:10px;align-items:center;max-width:92vw;transition:.3s;pointer-events:none}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}#toast i{font-size:28px;color:var(--acc)}
+.md{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:12px max(4vw,14px)}
+.md>div{background:var(--card);border-radius:14px;padding:14px;text-align:center}.md i{font-size:40px;color:#4b5d7a}.md .got i{color:var(--acc)}
+.md b{display:block;margin-top:6px}.md small{color:var(--mut);display:block;font-size:13px}.md .bar{height:6px;background:#22344f;border-radius:3px;margin-top:8px;overflow:hidden}.md .bar span{display:block;height:100%;background:var(--acc)}
+.pers{padding:0 max(4vw,14px) 20px}.sw{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}.sw button{width:48px;height:48px;min-height:48px;padding:0;border-radius:50%;border:3px solid transparent}.sw button.sel{border-color:#fff}
+.sw.mas button{background:#22344f;font-size:24px;color:var(--ink)}.sw.mas button.sel{border-color:var(--acc);color:var(--acc)}
+@media(prefers-reduced-motion:reduce){#toast{transition:none}}
 #hello{display:none;align-items:center;gap:14px;padding:14px max(4vw,14px) 0}
 #hello img,#hello>i{width:68px;height:68px;border-radius:50%;border:3px solid var(--acc);object-fit:cover;flex:none;background:#185FA5}
 #hello>i{display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff}
@@ -108,6 +116,7 @@ header h1{margin-right:auto;order:1}
   <button data-v="-4"><i class="ti ti-layout-grid"></i>Categorias</button>
   <button data-v="-2"><i class="ti ti-star"></i>Favoritos</button>
   <button data-v="-3"><i class="ti ti-history"></i>Histórico</button>
+  <button data-v="-5"><i class="ti ti-medal"></i>Medalhas</button>
 </nav>
 
 <div class="ov" id="player"><div class="box">
@@ -122,9 +131,11 @@ header h1{margin-right:auto;order:1}
 </div></div>
 
 <div class="ov" id="lock"><div class="panel">
-  <div style="font-size:48px">⏰</div>
-  <h2>O tempo de hoje acabou!</h2>
-  <p class="hint" style="font-size:16px">Volte amanhã para assistir mais.</p>
+  <i id="lockMas" class="ti ti-rocket" style="font-size:56px;color:var(--acc)"></i>
+  <h2 id="lockT">O tempo de hoje acabou!</h2>
+  <p class="hint" style="font-size:16px">Hoje foi legal! Que tal fazer uma destas coisas agora?</p>
+  <ul id="lockIdeas" style="text-align:left;line-height:1.5;margin:12px 0;padding-left:22px"></ul>
+  <p class="hint">Volte amanhã para assistir mais.</p>
   <div class="row" style="justify-content:center"><button id="lockP">Filtro Pais</button></div>
 </div></div>
 
@@ -230,7 +241,7 @@ async function addDur(list){
   }
   return list;
 }
-function usedNow(){if(used.d!==today())used={d:today(),s:0};return used.s}
+function usedNow(){if(used.d!==today())used={d:today(),s:0,b:0,cr:[],w:0};return used.s}
 let cur=-1, parent=false, playing=null;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
@@ -302,6 +313,7 @@ async function openCat(i,force){
   const c=cats()[i];
   if(!cfg.key){show([],'Peça para um responsável configurar o app em “Filtro Pais”.');return}
   if(i===-2){show(favs,'Nenhum favorito ainda. Toque em ☆ Favoritar num vídeo.');return}
+  if(i===-5){medalsView();return}
   if(i===-3){const seen=new Set();show(hist.filter(h=>!seen.has(h.id)&&seen.add(h.id)).map(h=>allVids().get(h.id)||{id:h.id,title:h.t,ch:h.c}),'Nada assistido ainda.');return}
   if(i===-4){$('grid').className='';
     $('grid').innerHTML=`<div class="cgrid" style="grid-column:1/-1;padding:0">${cats().map((c,k)=>`<button data-cat="${k}"><i class="ti ti-${icoFor(c.name)}"></i>${esc(c.name)}</button>`).join('')||'<p class="hint">Nenhuma categoria ainda.</p>'}</div>`;return}
@@ -361,7 +373,46 @@ async function search(q){
     show(await addDur(j.items.map(i=>({id:i.id.videoId,title:i.snippet.title,desc:i.snippet.description,ch:i.snippet.channelTitle,chId:i.snippet.channelId,thumb:(i.snippet.thumbnails.medium||{}).url}))));
   }catch(e){msg('Erro na busca: '+e.message)}
 }
-function timeUp(){return lim()&&usedNow()>=lim()*60}
+const isLearnName=n=>/cienc|educ|escol|idiom|ingles|espanh|tecn|program|histor|matem|curios|livro|natur|geogr|aprend|aula/.test(norm(n||''));
+function catOf(id){for(const c of cats()){const f=feed[c.name];if(f&&f.v.some(v=>v.id===id))return c.name}return ''}
+const bonus=()=>(usedNow(),used.b||0);
+const capS=()=>lim()*60+bonus()*60;
+function timeUp(){return lim()&&usedNow()>=capS()}
+let theme=load('mt_theme',{acc:'#ffc53d',mas:'rocket'});
+const COLORS=['#ffc53d','#4ade80','#60a5fa','#c084fc','#f472b6','#fb923c'];
+const MASCOTS=[['rocket','Foguete'],['robot','Robô'],['cat','Gato'],['dog','Cachorro'],['ufo','Disco voador'],['planet','Planeta']];
+function applyTheme(){document.documentElement.style.setProperty('--acc',theme.acc);$('lockMas').className='ti ti-'+theme.mas}
+let toastT;function toast(t,ico){$('toast').innerHTML=`<i class="ti ti-${ico||theme.mas}"></i><span>${esc(t)}</span>`;$('toast').classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>$('toast').classList.remove('on'),4000)}
+let done=load('mt_done',[]);
+const MEDALS=[
+ ['primeiro','flag','Primeiro passo','Termine 1 vídeo',d=>d.length,1],
+ ['cientista','flask','Cientista curioso','Termine 5 vídeos de ciência',d=>d.filter(x=>/cienc/.test(norm(x.k))).length,5],
+ ['brilhante','bulb','Mente brilhante','Termine 10 vídeos para aprender',d=>d.filter(x=>isLearnName(x.k)).length,10],
+ ['explorador','compass','Explorador','Assista vídeos de 3 categorias',d=>new Set(d.map(x=>x.k).filter(Boolean)).size,3],
+ ['poliglota','language','Poliglota','Termine 3 vídeos de idiomas',d=>d.filter(x=>/idiom|ingles|espanh/.test(norm(x.k))).length,3],
+ ['constancia','calendar-check','Constância','Aprenda em 5 dias diferentes',d=>new Set(d.filter(x=>isLearnName(x.k)).map(x=>new Date(x.ts).toLocaleDateString('sv'))).size,5],
+ ['colecionador','star','Colecionador','Tenha 5 favoritos',()=>favs.length,5],
+ ['sabio','school','Sábio','Termine 30 vídeos para aprender',d=>d.filter(x=>isLearnName(x.k)).length,30]
+];
+let gotM=load('mt_medals',[]);
+function checkMedals(){MEDALS.forEach(m=>{if(!gotM.includes(m[0])&&m[4](done)>=m[5]){gotM.push(m[0]);save('mt_medals',gotM);setTimeout(()=>toast('Nova medalha: '+m[2]+'!',m[1]),800)}})}
+function medalsView(){
+  $('grid').className='';
+  const nm=(cfg.kidName||'').trim();
+  $('grid').innerHTML=`<div style="grid-column:1/-1"><div class="sec"><h3>Minhas medalhas</h3><small class="hint">${gotM.length} de ${MEDALS.length}</small></div>
+  <div class="md">${MEDALS.map(m=>{const v=Math.min(m[4](done),m[5]),g=gotM.includes(m[0]);return `<div class="${g?'got':''}"><i class="ti ti-${m[1]}"></i><b>${esc(m[2])}</b><small>${esc(m[3])}</small><div class="bar"><span style="width:${Math.round(v/m[5]*100)}%"></span></div><small>${v}/${m[5]}</small></div>`}).join('')}</div>
+  <div class="pers"><div class="sec" style="padding-left:0"><h3>Meu estilo${nm?', '+esc(nm):''}</h3></div>
+  <p class="hint">Cor do app</p><div class="sw" id="swC">${COLORS.map(c=>`<button data-c="${c}" class="${c===theme.acc?'sel':''}" style="background:${c}" aria-label="Cor"></button>`).join('')}</div>
+  <p class="hint" style="margin-top:14px">Meu mascote</p><div class="sw mas" id="swM">${MASCOTS.map(([k,n])=>`<button data-m="${k}" class="${k===theme.mas?'sel':''}" aria-label="${n}"><i class="ti ti-${k}"></i></button>`).join('')}</div></div></div>`;
+}
+function lockIdeas(){
+  const lastLearn=hist.find(h=>new Date(h.ts).toLocaleDateString('sv')===today()&&isLearnName(h.k));
+  const ideas=['Brincar ao ar livre ou andar de bicicleta','Ler um livro ou um gibi','Desenhar algo que você viu hoje','Montar algo com Lego ou sucata','Contar para alguém da família o que você aprendeu','Ajudar em casa e ganhar um elogio 😉'].sort(()=>Math.random()-.5).slice(0,3);
+  if(lastLearn)ideas.unshift('Tentar fazer algo do vídeo “'+lastLearn.t+'”');
+  $('lockIdeas').innerHTML=ideas.map(x=>`<li>${esc(x)}</li>`).join('');
+  const n=(cfg.kidName||'').trim();$('lockT').textContent=(n?n+', o':'O')+' tempo de hoje acabou!';
+}
+function showLock(){lockIdeas();$('lock').classList.add('show')}
 function hello(){
   const n=(cfg.kidName||'').trim();let av='';try{av=localStorage.getItem('mt_avatar')||''}catch(e){}
   const on=(n||av)&&cur>=-1;$('hello').style.display=on?'flex':'none';if(!on)return;
@@ -369,12 +420,12 @@ function hello(){
   const h=new Date().getHours();const g=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
   $('helloT').textContent=n?'Oi, '+n+'!':'Oi!';$('helloS').textContent=g+'. O que vamos ver hoje?';
 }
-function tbar(){hello();const on=!!lim()&&cur>=-1;$('tbar').style.display=on?'block':'none';if(!on)return;const left=Math.max(0,lim()*60-usedNow());$('tbarT').textContent=Math.ceil(left/60)+' min restantes';$('tbarF').style.width=Math.round(left/(lim()*60)*100)+'%'}
-function showLeft(){tbar();$('left').textContent=lim()?'Tempo restante hoje: '+Math.max(0,Math.ceil((lim()*60-usedNow())/60))+' min':''}
+function tbar(){hello();const on=!!lim()&&cur>=-1;$('tbar').style.display=on?'block':'none';if(!on)return;const left=Math.max(0,capS()-usedNow());$('tbarT').textContent=Math.ceil(left/60)+' min restantes';$('tbarF').style.width=Math.round(left/capS()*100)+'%'}
+function showLeft(){tbar();$('left').textContent=lim()?'Tempo restante hoje: '+Math.max(0,Math.ceil((capS()-usedNow())/60))+' min'+(bonus()?' (inclui '+bonus()+' min de bônus por aprender)':''):''}
 function play(id,title,chId,chName){
-  if(timeUp()){$('lock').classList.add('show');return}
+  if(timeUp()){showLock();return}
   playing={id,chId};
-  hist.unshift({id,t:title,c:chName||'',ts:Date.now()});hist=hist.slice(0,300);save('mt_hist',hist);showLeft();
+  hist.unshift({id,t:title,c:chName||'',k:catOf(id),ts:Date.now()});hist=hist.slice(0,300);save('mt_hist',hist);showLeft();
   const st=prog[id]&&prog[id].d&&prog[id].t<prog[id].d-20?Math.floor(prog[id].t):0;
   if(window.YT&&YT.Player){$('frame').innerHTML='<div id="ytp"></div>';
     try{ytp=new YT.Player('ytp',{host:'https://www.youtube-nocookie.com',videoId:id,playerVars:{rel:0,modestbranding:1,autoplay:1,iv_load_policy:3,playsinline:1,start:st}})}catch(e){ytp=null}}
@@ -398,7 +449,15 @@ setInterval(()=>{
   if(used.s%5===0)saveProg();
   usedNow();used.s++;if(used.s%10===0)save('mt_used',used);
   if(used.s%60===0)showLeft();
-  if(timeUp()){save('mt_used',used);closePlayer();$('lock').classList.add('show')}
+  try{if(used.s%5===0&&ytp&&ytp.getCurrentTime&&playing){const t=ytp.getCurrentTime(),d=ytp.getDuration();
+    if(d>60&&t>=d*0.9&&!done.some(x=>x.id===playing.id&&x.ts>Date.now()-864e5)){const k=catOf(playing.id);
+      done.push({id:playing.id,k,ts:Date.now()});done=done.slice(-500);save('mt_done',done);
+      used.cr=used.cr||[];
+      if(lim()&&isLearnName(k)&&(used.b||0)<30&&!used.cr.includes(playing.id)){used.b=(used.b||0)+5;used.cr.push(playing.id);save('mt_used',used);toast('+5 min de bônus por aprender!');showLeft()}
+      else toast('Vídeo concluído! Mandou bem!');
+      checkMedals();}}}catch(e){}
+  if(lim()&&!used.w&&capS()-usedNow()<=300&&capS()-usedNow()>0){used.w=1;save('mt_used',used);toast('Faltam 5 minutos! Escolha bem o último vídeo.')}
+  if(timeUp()){save('mt_used',used);closePlayer();showLock()}
 },1000);
 function renderHist(){
   const fmtT=ts=>new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
@@ -457,6 +516,9 @@ $('acNew').onclick=()=>window.fb?fb.signUp($('acEmail').value.trim(),$('acPass')
 $('acG').onclick=()=>window.fb&&fb.google();
 $('acReset').onclick=()=>window.fb&&fb.reset($('acEmail').value.trim());
 $('acOutBtn').onclick=()=>window.fb&&fb.out();
+$('grid').addEventListener('click',e=>{const c=e.target.closest('#swC button');if(c){theme.acc=c.dataset.c;save('mt_theme',theme);applyTheme();medalsView();return}
+  const m=e.target.closest('#swM button');if(m){theme.mas=m.dataset.m;save('mt_theme',theme);applyTheme();medalsView();toast('Oi! Agora eu sou seu mascote!')}});
+applyTheme();checkMedals();
 $('bPais').onclick=askPin;$('lockP').onclick=askPin;
 $('cHistClr').onclick=()=>{hist=[];save('mt_hist',hist);renderHist()};
 $('pinX').onclick=()=>$('pin').classList.remove('show');
@@ -640,5 +702,6 @@ onAuthStateChanged(auth,async u=>{
   if(window.mtApi)go();else addEventListener('load',go);
 });
 </script>
+<div id="toast"></div>
 </body>
 </html>

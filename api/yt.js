@@ -24,7 +24,8 @@ module.exports = async (req, res) => {
   const q = new URLSearchParams();
   for (const k of rule.params) { const v = url.searchParams.get(k); if (v != null && v !== '') q.set(k, v.slice(0, 600)); }
   if (path === 'search') q.set('safeSearch', 'strict');
-  if (path === 'playlistItems' || path === 'search') q.set('maxResults', String(Math.min(+q.get('maxResults') || 15, 25)));
+  if (path === 'playlistItems') q.set('maxResults', String(Math.min(+q.get('maxResults') || 15, 50)));
+  if (path === 'search') q.set('maxResults', String(Math.min(+q.get('maxResults') || 15, 25)));
   q.set('key', process.env.YOUTUBE_KEY);
 
   try {

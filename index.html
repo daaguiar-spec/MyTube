@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="CasuloPlay">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127163504">
+<meta name="mt-build" content="20261127163835">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -258,7 +258,8 @@ let cfg=load('mt_cfg',{pin:'',key:'',open:false,
   cats:'Ciência: @manualdomundo, @CienciaTodoDia',
   words:'+18, nsfw, terror, assustador, sangue, gore, sexy, aposta, apostas, bet, cassino, tigrinho, briga',
   bch:''});
-let nm=load('mt_nm',{}), chc=load('mt_ch',{}), feed=load('mt_feed2',{}), hist=load('mt_hist',[]);
+let missVid=load('mt_missvid',{});
+let nm=load('mt_nm',{}), chc=load('mt_ch',{}), feed=load('mt_feed3',{}), hist=load('mt_hist',[]);
 const today=()=>new Date().toLocaleDateString('sv');
 let used=load('mt_used',{d:today(),s:0});
 const minD=()=>+(cfg.minDur??181), maxD=()=>+(cfg.maxDur??0), lim=()=>+(cfg.limit??0);
@@ -317,20 +318,20 @@ async function loadCat(c,force){
   await Promise.all(c.ch.map(async inp=>{
     try{
       const ch=await resolve(inp);
-      const j=await yt('playlistItems',{part:'snippet',playlistId:ch.up,maxResults:15});
+      const j=await yt('playlistItems',{part:'snippet',playlistId:ch.up,maxResults:isLearnName(c.name)?50:15});
       all.push(...j.items.map(i=>({id:i.snippet.resourceId.videoId,title:i.snippet.title,desc:i.snippet.description,
         ch:ch.title,chId:ch.id,thumb:(i.snippet.thumbnails.medium||i.snippet.thumbnails.default||{}).url,date:i.snippet.publishedAt,dur:old.get(i.snippet.resourceId.videoId)})));
     }catch(e){errs.push(e.message)}
   }));
   all.sort((a,b)=>b.date.localeCompare(a.date));
   await addDur(all);
-  feed[c.name]={t:Date.now(),v:all};save('mt_feed2',feed);
+  feed[c.name]={t:Date.now(),v:all};save('mt_feed3',feed);
   if(errs.length)msg(errs.join(' · '));
   return all;
 }
 let ytp=null;{const t=document.createElement('script');t.src='https://www.youtube.com/iframe_api';document.head.appendChild(t)}
 let lastList=[], favs=load('mt_favs',[]);
-function allVids(){const m=new Map();[...lastList,...Object.values(feed).flatMap(f=>f.v),...favs].forEach(v=>{if(v&&v.id&&!m.has(v.id))m.set(v.id,v)});return m}
+function allVids(){const m=new Map();[...Object.values(missVid).map(x=>x&&x.v).filter(Boolean),...lastList,...Object.values(feed).flatMap(f=>f.v),...favs].forEach(v=>{if(v&&v.id&&!m.has(v.id))m.set(v.id,v)});return m}
 let prog=load('mt_prog',{});
 const thumbOf=v=>v.thumb||('https://i.ytimg.com/vi/'+encodeURIComponent(v.id)+'/mqdefault.jpg');
 function card(v){const p=prog[v.id];const pc=p&&p.d?Math.min(100,Math.round(p.t/p.d*100)):0;
@@ -354,7 +355,7 @@ async function openCat(i,force){
   if(!cfg.key&&!SERVER){show([],'Peça para um responsável configurar o app em “Filtro Pais”.');return}
   if(i===-2){show(favs,'Nenhum favorito ainda. Toque em ☆ Favoritar num vídeo.');return}
   if(i===-5){medalsView();return}
-  if(i===-6){missionsView();return}
+  if(i===-6){missionsView();missFetch().then(c=>{if(c&&cur===-6)missionsView()});return}
   if(i===-3){const seen=new Set();show(hist.filter(h=>!seen.has(h.id)&&seen.add(h.id)).map(h=>allVids().get(h.id)||{id:h.id,title:h.t,ch:h.c}),'Nada assistido ainda.');return}
   if(i===-4){$('grid').className='';
     $('grid').innerHTML=`<div class="cgrid" style="grid-column:1/-1;padding:0">${cats().map((c,k)=>`<button data-cat="${k}"><i class="ti ti-${icoFor(c.name)}"></i>${esc(c.name)}</button>`).join('')||'<p class="hint">Nenhuma categoria ainda.</p>'}</div>`;return}
@@ -427,27 +428,27 @@ let toastT;function toast(t,ico){$('toast').innerHTML=`<i class="ti ti-${ico||th
 let done=load('mt_done',[]);
 let missDone=load('mt_missions',{});
 const MISSIONS=[
- {id:'vulcoes',ico:'flame',t:'Vulcões',sub:'A Terra por dentro',kw:/\b(vulca|vulco|lava\b|magma|erupc)/,
+ {id:'vulcoes',q2:'vulcões para crianças',ico:'flame',t:'Vulcões',sub:'A Terra por dentro',kw:/\b(vulca|vulco|lava\b|magma|erupc|terremoto|placas tectonicas)/,
   q:[['Como se chama o magma quando chega à superfície?',['Lava','Rocha','Cinza'],0],
      ['Qual é o maior vulcão conhecido do Sistema Solar?',['Monte Fuji','Monte Olimpo, em Marte','Vesúvio'],1],
      ['O Brasil tem vulcões ativos hoje?',['Sim, vários','Não','Só no Nordeste'],1]],
   d:'Com um adulto, monte um vulcão: num copo, coloque 2 colheres de bicarbonato e um pouco de detergente. Despeje vinagre (com corante, se tiver) e veja a “erupção”.'},
- {id:'espaco',ico:'planet',t:'Espaço',sub:'Planetas e estrelas',kw:/\b(espaco|planeta|sistema solar|lua\b|estrela|galaxia|astronom|nasa\b|foguete|buraco negro)/,
+ {id:'espaco',q2:'sistema solar para crianças',ico:'planet',t:'Espaço',sub:'Planetas e estrelas',kw:/\b(espaco|planeta|sistema solar|lua\b|estrela|galaxia|astronom|nasa\b|foguete|buraco negro|universo|marte|jupiter|saturno|sol\b|astronauta|satelite|cometa|asteroide)/,
   q:[['Qual é o maior planeta do Sistema Solar?',['Saturno','Júpiter','Terra'],1],
      ['Quanto tempo a luz do Sol leva para chegar à Terra?',['Cerca de 8 minutos','1 segundo','1 dia'],0],
      ['Qual é a estrela mais próxima da Terra?',['Estrela Polar','Alfa Centauri','O Sol'],2]],
   d:'Observe a Lua por 3 noites seguidas e desenhe a forma dela em cada noite. Ela mudou?'},
- {id:'corpo',ico:'heartbeat',t:'Corpo humano',sub:'A máquina incrível',kw:/\b(corpo humano|coracao|cerebro|ossos?\b|musculo|sangue|esqueleto|orgaos?\b)/,
+ {id:'corpo',q2:'corpo humano para crianças',ico:'heartbeat',t:'Corpo humano',sub:'A máquina incrível',kw:/\b(corpo humano|coracao|cerebro|ossos?\b|musculo|sangue|esqueleto|orgaos?\b|pulmao|estomago|celula|olhos? humano|dente)/,
   q:[['Quantos ossos tem o corpo de um adulto?',['106','206','306'],1],
      ['Qual órgão bombeia o sangue pelo corpo?',['Pulmão','Fígado','Coração'],2],
      ['Qual é o maior órgão do corpo humano?',['A pele','O cérebro','O estômago'],0]],
   d:'Conte seus batimentos por 15 segundos (dois dedos no pulso) e multiplique por 4. Depois pule por 1 minuto e conte de novo. O que mudou?'},
- {id:'dinos',ico:'bone',t:'Dinossauros',sub:'Gigantes do passado',kw:/\b(dinoss|fossil|fosseis|jurass|t-?rex)/,
+ {id:'dinos',q2:'dinossauros para crianças',ico:'bone',t:'Dinossauros',sub:'Gigantes do passado',kw:/\b(dinoss|fossil|fosseis|jurass|t-?rex|pre-?historic|mamute|extincao)/,
   q:[['Em que era geológica viveram os dinossauros?',['Mesozoica','Cenozoica','Paleolítica'],0],
      ['As aves de hoje descendem dos dinossauros?',['Sim','Não','Só os pinguins'],0],
      ['Como os cientistas estudam os dinossauros?',['Por fotos antigas','Pelos fósseis','Por vídeos'],1]],
   d:'Faça uma linha do tempo numa folha comprida: marque quando viveram os dinossauros, quando eles sumiram e quando surgiram os humanos.'},
- {id:'codigo',ico:'code',t:'Programação',sub:'Pense como um programador',kw:/\b(programa[cç]|programar|codigo|algoritmo|robotica|computador|python|scratch)/,
+ {id:'codigo',q2:'o que é programação para crianças',ico:'code',t:'Programação',sub:'Pense como um programador',kw:/\b(programac|programar|codigo|algoritmo|robo|robotica|computador|python|scratch|inteligencia artificial|internet|tecnologia)/,
   q:[['O que é um algoritmo?',['Um tipo de computador','Uma sequência de passos para resolver um problema','Um jogo'],1],
      ['O sistema binário usa quais dígitos?',['0 e 1','1 e 2','0 a 9'],0],
      ['Em programação, o que é um “bug”?',['Um inseto no teclado','Um erro no programa','Um vírus de celular'],1]],
@@ -542,7 +543,21 @@ setInterval(()=>{
   if(lim()&&!used.w&&capS()-usedNow()<=300&&capS()-usedNow()>0){used.w=1;save('mt_used',used);toast('Faltam 5 minutos! Escolha bem o último vídeo.')}
   if(timeUp()){save('mt_used',used);closePlayer();showLock()}
 },1000);
-function missVideo(m){
+async function missFetch(){
+  if(!cfg.open)return false;let ch=false;
+  for(const m of MISSIONS){
+    if(missVideo(m,true))continue;const c=missVid[m.id];if(c&&Date.now()-c.ts<7*864e5)continue;
+    try{const j=await yt('search',{part:'snippet',q:m.q2,type:'video',safeSearch:'strict',maxResults:10,regionCode:'BR',relevanceLanguage:'pt',videoEmbeddable:'true'});
+      const list=await addDur(j.items.map(i=>({id:i.id.videoId,title:i.snippet.title,desc:i.snippet.description,ch:i.snippet.channelTitle,chId:i.snippet.channelId,thumb:(i.snippet.thumbnails.medium||{}).url})));
+      const v=list.find(x=>ok(x));missVid[m.id]={ts:Date.now(),v:v||null};ch=true}catch(e){}
+  }
+  if(ch)save('mt_missvid',missVid);return ch;
+}
+function missVideo(m,localOnly){
+  const learn=new Set();cats().forEach(c=>{if(isLearnName(c.name)&&feed[c.name])feed[c.name].v.forEach(v=>learn.add(v.id))});
+  const loc=[...allVids().values()].find(v=>learn.has(v.id)&&ok(v)&&m.kw.test(norm(v.title)));
+  if(loc||localOnly)return loc;const c=missVid[m.id];return cfg.open&&c&&c.v&&ok(c.v)?c.v:null}
+function missVideoOld(m){
   const learn=new Set();cats().forEach(c=>{if(isLearnName(c.name)&&feed[c.name])feed[c.name].v.forEach(v=>learn.add(v.id))});
   return [...allVids().values()].find(v=>learn.has(v.id)&&ok(v)&&m.kw.test(norm(v.title)))}
 function missionsView(){
@@ -554,7 +569,7 @@ function missionsView(){
   :`<p class="hint" style="padding:0 max(4vw,14px)">Nenhuma missão liberada ainda. As missões aparecem quando há vídeos sobre o tema nos canais de aprendizado aprovados.</p>`}
   ${lock.length?`<div class="sec"><h3 style="font-size:16px;color:var(--mut)">Bloqueadas</h3></div>
   <div class="ms">${lock.map(m=>`<button disabled style="opacity:.5;cursor:default"><i class="ti ti-lock" style="color:var(--mut)"></i><span><b>${esc(m.t)}</b><small>Precisa de um canal sobre ${esc(m.t.toLowerCase())}</small></span></button>`).join('')}</div>
-  <p class="hint" style="padding:0 max(4vw,14px)">Para liberar, um responsável aprova em “Pais” um canal de aprendizado que fale desses temas.</p>`:''}</div>`;
+  <p class="hint" style="padding:0 max(4vw,14px)">Para liberar, um responsável aprova em “Pais” um canal de aprendizado que fale desses temas, ou ativa a busca em todo o YouTube (com SafeSearch).</p>`:''}</div>`;
 }
 function missionView(id){
   const m=MISSIONS.find(x=>x.id===id);if(!m)return;const v=missVideo(m);if(!v){missionsView();return}
@@ -646,7 +661,7 @@ window.mtApi={
   apply:d=>{if(!d||!d.cfg)return;const oldCats=cfg.cats;
     cfg={...cfg,...d.cfg};save('mt_cfg',cfg);save('mt_cfg_ts',d.updatedAt||Date.now());
     try{if(d.avatar)localStorage.setItem('mt_avatar',d.avatar);else localStorage.removeItem('mt_avatar')}catch(e){}
-    if(oldCats!==cfg.cats){feed={};save('mt_feed2',feed)}
+    if(oldCats!==cfg.cats){feed={};save('mt_feed3',feed)}
     if($('cfg').classList.contains('show'))openCfg();
     if(!document.querySelector('.ov.show'))openCat(cur);else tabs();},
   push:cloudPush,
@@ -711,7 +726,7 @@ $('cImp').onclick=()=>{
     const bin=atob(t);const c=JSON.parse(new TextDecoder().decode(Uint8Array.from(bin,ch=>ch.charCodeAt(0))));
     if(typeof c.cats!=='string')throw 0;
     cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,pin:validPin(c.pin||'')?c.pin:cfg.pin,minDur:c.minDur??181,maxDur:c.maxDur??0,limit:c.limit??0,kidName:c.kidName||cfg.kidName||'',appName:c.appName||cfg.appName||''};
-    save('mt_cfg',cfg);feed={};save('mt_feed2',feed);
+    save('mt_cfg',cfg);feed={};save('mt_feed3',feed);
     $('cMsg').textContent='Configuração aplicada!';
     openCfg();openCat(-1,true);
   }catch(e){const v=$('cCode').value;$('cMsg').textContent='Código inválido ('+(e&&e.message||'formato')+'; '+v.length+' caracteres; começa com “'+v.trim().slice(0,6)+'”). Confira se copiou tudo, do começo (MT1:) ao fim.'}
@@ -829,7 +844,7 @@ $('fRes').addEventListener('click',e=>{
     ptr.style.transition='none';ptr.style.height=Math.min(dy/2,70)+'px';ptr.textContent=dy>140?'↻ Solte para atualizar':'↓ Puxe para atualizar'},{passive:true});
   addEventListener('touchend',()=>{if(y0==null)return;ptr.style.transition='';
     if(dy>140){ptr.textContent='Atualizando…';ptr.style.height='44px';
-      try{(cur===-1?cats():[cats()[cur]]).forEach(c=>{if(c&&feed[c.name])feed[c.name].t=0});save('mt_feed2',feed)}catch(e){}
+      try{(cur===-1?cats():[cats()[cur]]).forEach(c=>{if(c&&feed[c.name])feed[c.name].t=0});save('mt_feed3',feed)}catch(e){}
       try{sessionStorage.setItem('mt_cur',cur)}catch(e){}setTimeout(()=>location.reload(),150)}
     else ptr.style.height='0';y0=null});
 }

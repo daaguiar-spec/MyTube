@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="CasuloPlay">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127150311">
+<meta name="mt-build" content="20261127161719">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -83,6 +83,15 @@ body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 .pers{padding:0 max(4vw,14px) 20px}.sw{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}.sw button{width:48px;height:48px;min-height:48px;padding:0;border-radius:50%;border:3px solid transparent}.sw button.sel{border-color:#fff}
 .sw.mas button{background:#22344f;font-size:24px;color:var(--ink)}.sw.mas button.sel{border-color:var(--acc);color:var(--acc)}
 @media(prefers-reduced-motion:reduce){#toast{transition:none}}
+.ms{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;padding:4px max(4vw,14px) 20px}
+.ms button{background:var(--card);border-radius:18px;padding:18px;text-align:left;display:flex;gap:14px;align-items:center;min-height:96px;font-size:16px}
+.ms i{font-size:38px;color:var(--acc);flex:none}.ms b{display:block;font-size:18px}.ms small{color:var(--mut);display:block;font-size:14px;font-weight:500}
+.ms .ok{outline:2px solid var(--acc)}
+.mi{padding:0 max(4vw,14px) 24px;max-width:760px}.mi h4{margin:22px 0 8px;font-size:18px}
+.qz{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px}.qz p{margin:0 0 10px;font-weight:700}
+.qz label{display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;cursor:pointer;min-height:44px}.qz label:hover{background:#22344f}
+.qz input{width:20px;height:20px;accent-color:var(--acc)}.qz .right{background:rgba(74,222,128,.18)}.qz .wrong{background:rgba(255,93,93,.18)}
+.dc{background:var(--card);border-radius:14px;padding:16px;border-left:0;outline:2px dashed #33496b}
 #hello{display:none;align-items:center;gap:14px;padding:14px max(4vw,14px) 0}
 #hello img,#hello>i{width:68px;height:68px;border-radius:50%;border:3px solid var(--acc);object-fit:cover;flex:none;background:#185FA5}
 #hello>i{display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff}
@@ -113,7 +122,7 @@ header h1{margin-right:auto;order:1}
 <main id="grid"></main>
 <nav id="bnav">
   <button data-v="-1"><i class="ti ti-home"></i>Início</button>
-  <button data-v="-4"><i class="ti ti-layout-grid"></i>Categorias</button>
+  <button data-v="-6"><i class="ti ti-target-arrow"></i>Missões</button>
   <button data-v="-2"><i class="ti ti-star"></i>Favoritos</button>
   <button data-v="-3"><i class="ti ti-history"></i>Histórico</button>
   <button data-v="-5"><i class="ti ti-medal"></i>Medalhas</button>
@@ -342,6 +351,7 @@ async function openCat(i,force){
   if(!cfg.key&&!SERVER){show([],'Peça para um responsável configurar o app em “Filtro Pais”.');return}
   if(i===-2){show(favs,'Nenhum favorito ainda. Toque em ☆ Favoritar num vídeo.');return}
   if(i===-5){medalsView();return}
+  if(i===-6){missionsView();return}
   if(i===-3){const seen=new Set();show(hist.filter(h=>!seen.has(h.id)&&seen.add(h.id)).map(h=>allVids().get(h.id)||{id:h.id,title:h.t,ch:h.c}),'Nada assistido ainda.');return}
   if(i===-4){$('grid').className='';
     $('grid').innerHTML=`<div class="cgrid" style="grid-column:1/-1;padding:0">${cats().map((c,k)=>`<button data-cat="${k}"><i class="ti ti-${icoFor(c.name)}"></i>${esc(c.name)}</button>`).join('')||'<p class="hint">Nenhuma categoria ainda.</p>'}</div>`;return}
@@ -412,7 +422,36 @@ const MASCOTS=[['rocket','Foguete'],['robot','Robô'],['cat','Gato'],['dog','Cac
 function applyTheme(){document.documentElement.style.setProperty('--acc',theme.acc);$('lockMas').className='ti ti-'+theme.mas}
 let toastT;function toast(t,ico){$('toast').innerHTML=`<i class="ti ti-${ico||theme.mas}"></i><span>${esc(t)}</span>`;$('toast').classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>$('toast').classList.remove('on'),4000)}
 let done=load('mt_done',[]);
+let missDone=load('mt_missions',{});
+const MISSIONS=[
+ {id:'vulcoes',ico:'flame',t:'Vulcões',sub:'A Terra por dentro',kw:/vulc|lava|magma|erup/,
+  q:[['Como se chama o magma quando chega à superfície?',['Lava','Rocha','Cinza'],0],
+     ['Qual é o maior vulcão conhecido do Sistema Solar?',['Monte Fuji','Monte Olimpo, em Marte','Vesúvio'],1],
+     ['O Brasil tem vulcões ativos hoje?',['Sim, vários','Não','Só no Nordeste'],1]],
+  d:'Com um adulto, monte um vulcão: num copo, coloque 2 colheres de bicarbonato e um pouco de detergente. Despeje vinagre (com corante, se tiver) e veja a “erupção”.'},
+ {id:'espaco',ico:'planet',t:'Espaço',sub:'Planetas e estrelas',kw:/espa[cç]o|planeta|lua|estrela|gal[aá]xia|astron|nasa|foguete/,
+  q:[['Qual é o maior planeta do Sistema Solar?',['Saturno','Júpiter','Terra'],1],
+     ['Quanto tempo a luz do Sol leva para chegar à Terra?',['Cerca de 8 minutos','1 segundo','1 dia'],0],
+     ['Qual é a estrela mais próxima da Terra?',['Estrela Polar','Alfa Centauri','O Sol'],2]],
+  d:'Observe a Lua por 3 noites seguidas e desenhe a forma dela em cada noite. Ela mudou?'},
+ {id:'corpo',ico:'heartbeat',t:'Corpo humano',sub:'A máquina incrível',kw:/corpo|cora[cç][aã]o|c[eé]rebro|osso|m[uú]sculo|sangue/,
+  q:[['Quantos ossos tem o corpo de um adulto?',['106','206','306'],1],
+     ['Qual órgão bombeia o sangue pelo corpo?',['Pulmão','Fígado','Coração'],2],
+     ['Qual é o maior órgão do corpo humano?',['A pele','O cérebro','O estômago'],0]],
+  d:'Conte seus batimentos por 15 segundos (dois dedos no pulso) e multiplique por 4. Depois pule por 1 minuto e conte de novo. O que mudou?'},
+ {id:'dinos',ico:'bone',t:'Dinossauros',sub:'Gigantes do passado',kw:/dinoss|f[oó]ssil|jur[aá]ss|t-?rex/,
+  q:[['Em que era geológica viveram os dinossauros?',['Mesozoica','Cenozoica','Paleolítica'],0],
+     ['As aves de hoje descendem dos dinossauros?',['Sim','Não','Só os pinguins'],0],
+     ['Como os cientistas estudam os dinossauros?',['Por fotos antigas','Pelos fósseis','Por vídeos'],1]],
+  d:'Faça uma linha do tempo numa folha comprida: marque quando viveram os dinossauros, quando eles sumiram e quando surgiram os humanos.'},
+ {id:'codigo',ico:'code',t:'Programação',sub:'Pense como um programador',kw:/program|c[oó]digo|algoritmo|rob[oô]|computador|python|scratch/,
+  q:[['O que é um algoritmo?',['Um tipo de computador','Uma sequência de passos para resolver um problema','Um jogo'],1],
+     ['O sistema binário usa quais dígitos?',['0 e 1','1 e 2','0 a 9'],0],
+     ['Em programação, o que é um “bug”?',['Um inseto no teclado','Um erro no programa','Um vírus de celular'],1]],
+  d:'Escreva o “algoritmo” para fazer um sanduíche, passo a passo. Peça para alguém seguir exatamente o que você escreveu, ao pé da letra. Funcionou?'}
+];
 const MEDALS=[
+ ['missoes','target-arrow','Missionário','Complete 5 missões',()=>Object.keys(missDone).length,5],
  ['primeiro','flag','Primeiro passo','Termine 1 vídeo',d=>d.length,1],
  ['cientista','flask','Cientista curioso','Termine 5 vídeos de ciência',d=>d.filter(x=>/cienc/.test(norm(x.k))).length,5],
  ['brilhante','bulb','Mente brilhante','Termine 10 vídeos para aprender',d=>d.filter(x=>isLearnName(x.k)).length,10],
@@ -492,10 +531,43 @@ setInterval(()=>{
   if(lim()&&!used.w&&capS()-usedNow()<=300&&capS()-usedNow()>0){used.w=1;save('mt_used',used);toast('Faltam 5 minutos! Escolha bem o último vídeo.')}
   if(timeUp()){save('mt_used',used);closePlayer();showLock()}
 },1000);
+function missVideo(m){const seen=new Set();return [...allVids().values()].find(v=>ok(v)&&m.kw.test(norm(v.title+' '+(v.desc||''))))}
+function missionsView(){
+  $('grid').className='';const n=Object.keys(missDone).length;
+  $('grid').innerHTML=`<div style="grid-column:1/-1"><div class="sec"><h3>Missões</h3><small class="hint">${n} de ${MISSIONS.length} concluídas</small></div>
+  <p class="hint" style="padding:0 max(4vw,14px);margin:0 0 12px">Assista, responda 3 perguntas e faça o desafio. Ganhe medalhas e minutos bônus.</p>
+  <div class="ms">${MISSIONS.map(m=>`<button data-mi="${m.id}" class="${missDone[m.id]?'ok':''}"><i class="ti ti-${m.ico}"></i><span><b>${esc(m.t)}</b><small>${missDone[m.id]?'Concluída':esc(m.sub)}</small></span></button>`).join('')}</div></div>`;
+}
+function missionView(id){
+  const m=MISSIONS.find(x=>x.id===id);if(!m)return;const v=missVideo(m);
+  $('grid').className='';
+  $('grid').innerHTML=`<div style="grid-column:1/-1" class="mi">
+   <button id="miBack" style="margin:14px 0 4px;background:none;padding:0;color:var(--mut)"><i class="ti ti-arrow-left"></i> Missões</button>
+   <h2 style="margin:4px 0 4px;font-size:28px"><i class="ti ti-${m.ico}" style="color:var(--acc)"></i> ${esc(m.t)}</h2>
+   <h4>1. Assista</h4>${v?`<div style="max-width:360px">${card(v)}</div>`:'<p class="hint">Nenhum vídeo sobre este tema nos canais aprovados ainda. Peça para um responsável aprovar um canal sobre '+esc(m.t.toLowerCase())+'. Você pode fazer o resto da missão mesmo assim.</p>'}
+   <h4>2. Responda</h4>${m.q.map((q,qi)=>`<div class="qz" data-q="${qi}"><p>${esc(q[0])}</p>${q[1].map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}">${esc(o)}</label>`).join('')}</div>`).join('')}
+   <h4>3. Desafio em casa</h4><div class="dc"><p style="margin:0 0 10px">${esc(m.d)}</p><label class="chk" style="margin:0"><input type="checkbox" id="miDone"> Fiz o desafio!</label></div>
+   <p class="hint" id="miMsg"></p>
+   <div class="row"><button class="pri" id="miOk" data-id="${m.id}">${missDone[m.id]?'Missão já concluída':'Concluir missão'}</button></div></div>`;
+}
+function missionDone(id){
+  const m=MISSIONS.find(x=>x.id===id);let right=0,all=true;
+  m.q.forEach((q,qi)=>{const sel=document.querySelector(`input[name=q${qi}]:checked`);const box=document.querySelector(`.qz[data-q="${qi}"]`);
+    box.querySelectorAll('label').forEach(l=>l.classList.remove('right','wrong'));
+    if(!sel){all=false;return}const ok2=+sel.value===q[2];if(ok2)right++;sel.closest('label').classList.add(ok2?'right':'wrong')});
+  if(!all){$('miMsg').textContent='Responda as 3 perguntas.';return}
+  if(right<2){$('miMsg').textContent='Você acertou '+right+' de 3. Assista ao vídeo de novo e tente outra vez!';return}
+  if(!$('miDone').checked){$('miMsg').textContent='Falta fazer o desafio em casa e marcar “Fiz o desafio!”.';return}
+  if(missDone[id]){$('miMsg').textContent='Você já tinha concluído esta missão. Mandou bem de novo!';return}
+  missDone[id]={ts:Date.now(),score:right};save('mt_missions',missDone);
+  let msg='Missão concluída! '+right+'/3 acertos.';
+  if(lim()&&(used.b||0)<30){usedNow();used.b=(used.b||0)+5;save('mt_used',used);msg+=' +5 min de bônus!';showLeft()}
+  toast(msg,'target-arrow');checkMedals();missionsView();
+}
 function renderHist(){
   const fmtT=ts=>new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
   $('cHist').innerHTML=hist.length?hist.slice(0,80).map(h=>`<div><a href="https://www.youtube.com/watch?v=${esc(h.id)}" target="_blank" rel="noopener" style="color:var(--ink)">${esc(h.t)}</a><small>${esc(h.c)} · ${fmtT(h.ts)}</small></div>`).join(''):'<p class="hint">Nada assistido ainda.</p>';
-  $('cUsed').textContent='Assistido hoje: '+Math.round(usedNow()/60)+' min';
+  $('cUsed').textContent='Assistido hoje: '+Math.round(usedNow()/60)+' min · Missões concluídas: '+Object.keys(missDone).length+' de '+MISSIONS.length;
 }
 function openCfg(){
   $('cMin').value=String(minD());$('cMax').value=String(maxD());$('cLim').value=String(lim());renderHist();
@@ -580,6 +652,9 @@ $('grid').addEventListener('click',e=>{const c=e.target.closest('#swC button');i
   const m=e.target.closest('#swM button');if(m){theme.mas=m.dataset.m;save('mt_theme',theme);applyTheme();medalsView();toast('Oi! Agora eu sou seu mascote!')}});
 applyTheme();checkMedals();
 if(SERVER)$('cKeyH').textContent='Opcional. Deixe em branco para usar o servidor do app.';
+$('grid').addEventListener('click',e=>{const b=e.target.closest('[data-mi]');if(b){missionView(b.dataset.mi);scrollTo(0,0);return}
+  if(e.target.closest('#miBack')){missionsView();scrollTo(0,0);return}
+  const o=e.target.closest('#miOk');if(o)missionDone(o.dataset.id)});
 $('bPais').onclick=askPin;$('lockP').onclick=askPin;
 $('cHistClr').onclick=()=>{hist=[];save('mt_hist',hist);renderHist()};
 $('pinX').onclick=()=>{$('pin').classList.remove('show');payCheck()};

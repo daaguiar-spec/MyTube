@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Casulo Play: vídeos com segurança para seu filho</title>
+<meta name="description" content="Você escolhe os canais, define o tempo de tela e acompanha o que seu filho assiste. Sem anúncios e sem venda de dados.">
+<link rel="icon" href="../icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root{--bg:#0f1b2d;--bg2:#0b1422;--card:#18273e;--ink:#f3f6fb;--mut:#a9b8cf;--acc:#ffc53d}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 Nunito,system-ui,sans-serif;overflow-x:clip}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 max(5vw,18px)}
+.band{padding:clamp(40px,7vw,88px) 0}
+.alt{background:var(--bg2)}
+nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0}
+.logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:22px;text-decoration:none}
+.logo img{width:40px;height:40px;border-radius:10px}
+.logo b{color:var(--acc)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 26px;border-radius:999px;background:var(--acc);color:#1a1300;font-weight:900;text-decoration:none;font-size:17px}
+.btn.sec{background:transparent;color:var(--ink);border:2px solid #33496b}
+.btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:48px;align-items:center}
+h1{font-size:clamp(34px,5.2vw,54px);line-height:1.08;margin:0 0 18px;font-weight:900;text-wrap:balance}
+h1 span{color:var(--acc)}
+h2{font-size:clamp(28px,3.6vw,40px);line-height:1.15;margin:0 0 14px;font-weight:900;text-wrap:balance}
+.lead{font-size:19px;color:var(--mut);margin:0 0 28px;max-width:34em}
+.ctas{display:flex;flex-wrap:wrap;gap:12px}
+.note{color:var(--mut);font-size:14px;margin-top:14px}
+.phone{justify-self:center;width:min(300px,78vw);aspect-ratio:9/18;background:#0b1422;border:10px solid #22344f;border-radius:38px;padding:16px 12px;box-shadow:0 30px 60px rgba(0,0,0,.35);overflow:hidden}
+.ph-top{display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:15px}.ph-top b{color:var(--acc)}
+.ph-lock{font-size:11px;border:1px solid #33496b;border-radius:999px;padding:1px 8px;color:var(--mut);font-weight:700}
+.ph-hi{display:flex;gap:10px;align-items:center;margin:14px 0 10px}
+.ph-av{width:40px;height:40px;border-radius:50%;background:#185FA5;border:2px solid var(--acc);display:grid;place-items:center}
+.ph-hi strong{display:block;font-size:14px}.ph-hi small{color:var(--mut);font-size:11px}
+.ph-bar{height:5px;background:#22344f;border-radius:3px;margin:4px 0 12px}.ph-bar i{display:block;height:100%;width:70%;background:var(--acc);border-radius:3px}
+.ph-chips{display:flex;gap:6px;margin-bottom:10px}.ph-chips span{font-size:11px;padding:3px 9px;border-radius:999px;background:#22344f;font-weight:700}.ph-chips span:first-child{background:var(--acc);color:#1a1300}
+.ph-lbl{font-size:11px;font-weight:900;margin:8px 0 6px}
+.ph-v{height:74px;border-radius:9px;margin-bottom:8px;position:relative}
+.ph-v::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-40%,-50%);border-left:14px solid rgba(255,255,255,.9);border-top:9px solid transparent;border-bottom:9px solid transparent}
+.v1{background:#378ADD}.v2{background:#1D9E75}.v3{background:#D85A30}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:30px}
+.card{background:var(--card);border-radius:18px;padding:24px}
+.card i{font-size:34px;color:var(--acc)}
+.card h3{margin:10px 0 6px;font-size:20px}
+.card p{margin:0;color:var(--mut)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:30px;counter-reset:s}
+.step{border-top:3px solid var(--acc);padding-top:16px}
+.step b{display:block;font-size:44px;line-height:1;color:var(--acc);font-weight:900}
+.step h3{margin:8px 0 6px;font-size:20px}.step p{margin:0;color:var(--mut)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:start}
+ul.check{list-style:none;padding:0;margin:0}
+ul.check li{display:flex;gap:10px;margin:0 0 12px}
+ul.check i{color:var(--acc);font-size:22px;flex:none;margin-top:1px}
+details{background:var(--card);border-radius:14px;padding:16px 20px;margin-bottom:12px}
+summary{cursor:pointer;font-weight:900;font-size:18px}
+details p{color:var(--mut);margin:10px 0 0}
+.final{text-align:center}
+.final p{color:var(--mut);max-width:36em;margin:0 auto 26px}
+footer{padding:30px 0 40px;color:var(--mut);font-size:14px;text-align:center}
+@media(max-width:820px){.hero,.two{grid-template-columns:1fr}.phone{order:2}}
+@media(prefers-reduced-motion:no-preference){.phone{animation:up .8s ease-out}@keyframes up{from{transform:translateY(20px);opacity:0}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="logo" href="./"><img src="../icon-192.png" alt="">Casulo <b>Play</b></a>
+    <a class="btn sec" href="../" style="min-height:44px;padding:0 18px;font-size:15px">Já sou assinante</a>
+  </nav>
+</div>
+
+<section class="band" style="padding-top:20px">
+  <div class="wrap hero">
+    <div>
+      <h1>Seu filho assiste vídeos. <span>Você escolhe quais.</span></h1>
+      <p class="lead">O Casulo Play é um espaço seguro de vídeos para crianças. Você aprova os canais, define o tempo de tela e acompanha o que ele assiste, tudo de forma simples, no celular ou tablet.</p>
+      <div class="ctas">
+        <a class="btn" id="buy1" href="https://pay.kiwify.com.br/NKplJIf">Assinar o Casulo Play</a>
+        <a class="btn sec" href="#como">Como funciona</a>
+      </div>
+      <p class="note">7 dias de garantia. Cancele quando quiser.</p>
+    </div>
+    <div class="phone" aria-hidden="true">
+      <div class="ph-top"><span>Casulo <b>Play</b></span><span class="ph-lock">Pais</span></div>
+      <div class="ph-hi"><div class="ph-av"><i class="ti ti-user" style="color:#fff"></i></div><div><strong>Oi, Pedro!</strong><small>Boa tarde. O que vamos ver hoje?</small></div></div>
+      <div style="font-size:11px;color:var(--mut);display:flex;justify-content:space-between"><span>Tempo de hoje</span><span>45 min</span></div>
+      <div class="ph-bar"><i></i></div>
+      <div class="ph-chips"><span>Todos</span><span>Ciência</span><span>Games</span></div>
+      <div class="ph-lbl">Sugestão para aprender</div>
+      <div class="ph-v v1"></div>
+      <div class="ph-lbl">Novos em Ciência</div>
+      <div class="ph-v v2"></div><div class="ph-v v3"></div>
+    </div>
+  </div>
+</section>
+
+<section class="band alt">
+  <div class="wrap">
+    <h2>O problema que todo pai conhece</h2>
+    <p class="lead" style="margin:0">Em plataformas abertas de vídeo, um clique leva a outro, e de repente a criança está vendo algo que você nunca aprovaria. Recomendações automáticas, comentários, vídeos sem fim. Controlar tudo isso sozinho cansa.</p>
+  </div>
+</section>
+
+<section class="band" id="como">
+  <div class="wrap">
+    <h2>Como funciona</h2>
+    <div class="steps">
+      <div class="step"><b>1</b><h3>Você assina e cria a conta</h3><p>Leva menos de 2 minutos. Sem precisar instalar nada da loja de apps.</p></div>
+      <div class="step"><b>2</b><h3>Escolhe o que pode</h3><p>Aprove canais a partir de listas prontas por idade ou pesquise por assunto. Bloqueie palavras e defina o limite diário.</p></div>
+      <div class="step"><b>3</b><h3>Seu filho assiste tranquilo</h3><p>Ele vê só o que foi liberado, numa tela simples e bonita. Os vídeos novos dos canais aprovados aparecem sozinhos.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band alt">
+  <div class="wrap">
+    <h2>Tudo o que você precisa para ficar tranquilo</h2>
+    <div class="grid">
+      <div class="card"><i class="ti ti-shield-check"></i><h3>Só canais aprovados</h3><p>Nada aparece sem passar pela sua escolha. Bloqueie um canal com um toque.</p></div>
+      <div class="card"><i class="ti ti-clock-hour-4"></i><h3>Limite de tempo</h3><p>Defina quanto tempo por dia. Quando acaba, o app sugere atividades fora da tela.</p></div>
+      <div class="card"><i class="ti ti-filter"></i><h3>Filtro de palavras e Shorts</h3><p>Esconda vídeos com palavras que você não quer e evite vídeos curtos que viciam.</p></div>
+      <div class="card"><i class="ti ti-history"></i><h3>Histórico</h3><p>Veja o que foi assistido, com data e hora.</p></div>
+      <div class="card"><i class="ti ti-bulb"></i><h3>Incentivo a aprender</h3><p>Sugestões educativas em destaque, medalhas por aprender e minutos bônus por vídeos educativos.</p></div>
+      <div class="card"><i class="ti ti-lock"></i><h3>Área dos pais com PIN</h3><p>Só você muda as regras. As configurações ficam na sua conta e valem em todos os aparelhos.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap two">
+    <div>
+      <h2>Feito para a família, com respeito à privacidade</h2>
+      <p class="lead" style="margin:0">O Casulo Play é uma ferramenta de supervisão escolhida pelos pais. Coletamos só o necessário para o app funcionar.</p>
+    </div>
+    <ul class="check">
+      <li><i class="ti ti-circle-check"></i><span>Sem anúncios no app.</span></li>
+      <li><i class="ti ti-circle-check"></i><span>Não vendemos dados de ninguém.</span></li>
+      <li><i class="ti ti-circle-check"></i><span>A criança não cria conta nem informa e-mail.</span></li>
+      <li><i class="ti ti-circle-check"></i><span>O responsável pode pedir a exclusão da conta e dos dados a qualquer momento.</span></li>
+      <li><i class="ti ti-circle-check"></i><span>Os vídeos são exibidos pelo player oficial do YouTube.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="band alt">
+  <div class="wrap" style="max-width:820px">
+    <h2>Perguntas frequentes</h2>
+    <details><summary>Preciso instalar algo?</summary><p>Não. O Casulo Play abre no navegador e pode ser adicionado à tela inicial do celular ou tablet, como um app.</p></details>
+    <details><summary>Funciona em quais aparelhos?</summary><p>Celulares e tablets Android e iPhone/iPad, além de computadores, com um navegador atualizado e internet.</p></details>
+    <details><summary>Meu filho consegue mudar as regras?</summary><p>Não. A área dos pais é protegida por PIN, com bloqueio temporário depois de tentativas erradas.</p></details>
+    <details><summary>Posso usar em mais de um aparelho?</summary><p>Sim. Entre com a mesma conta e as configurações aparecem em todos os aparelhos.</p></details>
+    <details><summary>Ele ainda consegue abrir o YouTube por fora?</summary><p>O Casulo Play controla o que acontece dentro dele. Para evitar que a criança use outros apps, recomendamos também bloquear o app do YouTube e o navegador pelas ferramentas do próprio aparelho (Tempo de Uso no iPhone ou Family Link no Android).</p></details>
+    <details><summary>E se eu não gostar?</summary><p>Você tem 7 dias de garantia para pedir o reembolso pela Kiwify. Depois disso, pode cancelar a assinatura quando quiser.</p></details>
+  </div>
+</section>
+
+<section class="band final">
+  <div class="wrap">
+    <h2>Dê ao seu filho um espaço seguro para assistir e aprender</h2>
+    <p>Você escolhe, ele aproveita, e todo mundo fica mais tranquilo.</p>
+    <a class="btn" href="https://pay.kiwify.com.br/NKplJIf">Assinar o Casulo Play</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Casulo Play · Pagamento processado pela Kiwify · O Casulo Play não é afiliado ao YouTube nem ao Google.</div>
+</footer>
+</body>
+</html>

@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="CasuloPlay">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127161719">
+<meta name="mt-build" content="20261127162910">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -92,6 +92,9 @@ body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 .qz label{display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;cursor:pointer;min-height:44px}.qz label:hover{background:#22344f}
 .qz input{width:20px;height:20px;accent-color:var(--acc)}.qz .right{background:rgba(74,222,128,.18)}.qz .wrong{background:rgba(255,93,93,.18)}
 .dc{background:var(--card);border-radius:14px;padding:16px;border-left:0;outline:2px dashed #33496b}
+.lvl{background:var(--card);border-radius:16px;padding:14px 16px}.lvl b{display:block;font-size:18px}.lvl span{color:var(--mut);font-size:14px}
+.lvl .bar{height:8px;background:#22344f;border-radius:4px;margin-top:8px;overflow:hidden}.lvl .bar i{display:block;height:100%;background:var(--acc)}
+.lvchip{display:inline-flex;gap:6px;align-items:center;margin-top:6px;background:#22344f;color:var(--acc);font-weight:700;font-size:13px;padding:3px 10px;border-radius:999px}
 #hello{display:none;align-items:center;gap:14px;padding:14px max(4vw,14px) 0}
 #hello img,#hello>i{width:68px;height:68px;border-radius:50%;border:3px solid var(--acc);object-fit:cover;flex:none;background:#185FA5}
 #hello>i{display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff}
@@ -115,7 +118,7 @@ header h1{margin-right:auto;order:1}
   <button id="bPais" class="mini" aria-label="Filtro Pais"><i class="ti ti-lock"></i> Pais</button>
 </header>
 <div id="ptr">↓ Puxe para atualizar</div>
-<div id="hello"><img id="helloImg" alt=""><i id="helloIco" class="ti ti-user"></i><div><b id="helloT"></b><small id="helloS"></small></div></div>
+<div id="hello"><img id="helloImg" alt=""><i id="helloIco" class="ti ti-user"></i><div style="flex:1"><b id="helloT"></b><small id="helloS"></small><div id="helloLv"></div></div></div>
 <div id="tbar"><div><span>Tempo de hoje</span><span id="tbarT"></span></div><div class="bar"><i id="tbarF"></i></div></div>
 <nav id="tabs"></nav>
 <p id="msg"></p>
@@ -462,11 +465,19 @@ const MEDALS=[
  ['sabio','school','Sábio','Termine 30 vídeos para aprender',d=>d.filter(x=>isLearnName(x.k)).length,30]
 ];
 let gotM=load('mt_medals',[]);
-function checkMedals(){MEDALS.forEach(m=>{if(!gotM.includes(m[0])&&m[4](done)>=m[5]){gotM.push(m[0]);save('mt_medals',gotM);setTimeout(()=>toast('Nova medalha: '+m[2]+'!',m[1]),800)}})}
+let xpExtra=load('mt_xp',0);
+const LV=[[0,'Iniciante'],[50,'Curioso'],[150,'Explorador'],[300,'Aventureiro'],[500,'Descobridor'],[800,'Cientista'],[1200,'Inventor'],[1700,'Sábio'],[2300,'Mestre'],[3000,'Lenda']];
+function xpTotal(){return done.length*10+Object.keys(missDone).length*50+gotM.length*20+xpExtra}
+function lvInfo(){const x=xpTotal();let i=0;while(i+1<LV.length&&x>=LV[i+1][0])i++;const nx=LV[i+1];
+  return {x,n:i+1,t:LV[i][1],pct:nx?Math.round((x-LV[i][0])/(nx[0]-LV[i][0])*100):100,falta:nx?nx[0]-x:0}}
+function addXp(n){xpExtra+=n;save('mt_xp',xpExtra);checkLevel()}
+function checkLevel(){const l=lvInfo(),last=load('mt_lvl',0);if(last&&l.n>last)setTimeout(()=>toast('Subiu para o nível '+l.n+': '+l.t+'!','trophy'),1600);if(l.n!==last)save('mt_lvl',l.n);hello()}
+function lvHtml(){const l=lvInfo();return `<div class="lvl"><b>Nível ${l.n} · ${esc(l.t)}</b><span>${l.x} XP${l.falta?' · faltam '+l.falta+' para o próximo':''}</span><div class="bar"><i style="width:${l.pct}%"></i></div></div>`}
+function checkMedals(){MEDALS.forEach(m=>{if(!gotM.includes(m[0])&&m[4](done)>=m[5]){gotM.push(m[0]);save('mt_medals',gotM);setTimeout(()=>toast('Nova medalha: '+m[2]+'!',m[1]),800)}});checkLevel()}
 function medalsView(){
   $('grid').className='';
   const nm=(cfg.kidName||'').trim();
-  $('grid').innerHTML=`<div style="grid-column:1/-1"><div class="sec"><h3>Minhas medalhas</h3><small class="hint">${gotM.length} de ${MEDALS.length}</small></div>
+  $('grid').innerHTML=`<div style="grid-column:1/-1"><div style="padding:14px max(4vw,14px) 0">${lvHtml()}</div><div class="sec"><h3>Minhas medalhas</h3><small class="hint">${gotM.length} de ${MEDALS.length}</small></div>
   <div class="md">${MEDALS.map(m=>{const v=Math.min(m[4](done),m[5]),g=gotM.includes(m[0]);return `<div class="${g?'got':''}"><i class="ti ti-${m[1]}"></i><b>${esc(m[2])}</b><small>${esc(m[3])}</small><div class="bar"><span style="width:${Math.round(v/m[5]*100)}%"></span></div><small>${v}/${m[5]}</small></div>`}).join('')}</div>
   <div class="pers"><div class="sec" style="padding-left:0"><h3>Meu estilo${nm?', '+esc(nm):''}</h3></div>
   <p class="hint">Cor do app</p><div class="sw" id="swC">${COLORS.map(c=>`<button data-c="${c}" class="${c===theme.acc?'sel':''}" style="background:${c}" aria-label="Cor"></button>`).join('')}</div>
@@ -485,7 +496,7 @@ function appName(){
   $('appName').innerHTML=i>0?esc(n.slice(0,i))+(sp?' ':'')+'<b>'+esc(n.slice(sp?i+1:i))+'</b>':'<b>'+esc(n)+'</b>';
   document.title=n;const m=document.querySelector('meta[name=apple-mobile-web-app-title]');if(m)m.content=n;
 }
-function hello(){appName();
+function hello(){appName();try{const l=lvInfo();$('helloLv').innerHTML=`<span class="lvchip"><i class="ti ti-trophy"></i> Nível ${l.n} · ${esc(l.t)}</span>`}catch(e){}
   const n=(cfg.kidName||'').trim();let av='';try{av=localStorage.getItem('mt_avatar')||''}catch(e){}
   const on=(n||av)&&cur>=-1;$('hello').style.display=on?'flex':'none';if(!on)return;
   $('helloImg').style.display=av?'':'none';if(av)$('helloImg').src=av;$('helloIco').style.display=av?'none':'flex';

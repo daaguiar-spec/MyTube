@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="CasuloPlay">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127163345">
+<meta name="mt-build" content="20261127163504">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -547,17 +547,22 @@ function missVideo(m){
   return [...allVids().values()].find(v=>learn.has(v.id)&&ok(v)&&m.kw.test(norm(v.title)))}
 function missionsView(){
   $('grid').className='';const n=Object.keys(missDone).length;
-  $('grid').innerHTML=`<div style="grid-column:1/-1"><div class="sec"><h3>Missões</h3><small class="hint">${n} de ${MISSIONS.length} concluídas</small></div>
-  <p class="hint" style="padding:0 max(4vw,14px);margin:0 0 12px">Assista, responda 3 perguntas e faça o desafio. Ganhe medalhas e minutos bônus.</p>
-  <div class="ms">${MISSIONS.map(m=>`<button data-mi="${m.id}" class="${missDone[m.id]?'ok':''}"><i class="ti ti-${m.ico}"></i><span><b>${esc(m.t)}</b><small>${missDone[m.id]?'Concluída':esc(m.sub)}</small></span></button>`).join('')}</div></div>`;
+  const av=MISSIONS.filter(m=>missVideo(m)),lock=MISSIONS.filter(m=>!missVideo(m));
+  $('grid').innerHTML=`<div style="grid-column:1/-1"><div class="sec"><h3>Missões</h3><small class="hint">${n} concluídas</small></div>
+  ${av.length?`<p class="hint" style="padding:0 max(4vw,14px);margin:0 0 12px">Assista, responda 3 perguntas e faça o desafio. Ganhe medalhas, pontos e minutos bônus.</p>
+  <div class="ms">${av.map(m=>`<button data-mi="${m.id}" class="${missDone[m.id]?'ok':''}"><i class="ti ti-${m.ico}"></i><span><b>${esc(m.t)}</b><small>${missDone[m.id]?'Concluída':esc(m.sub)}</small></span></button>`).join('')}</div>`
+  :`<p class="hint" style="padding:0 max(4vw,14px)">Nenhuma missão liberada ainda. As missões aparecem quando há vídeos sobre o tema nos canais de aprendizado aprovados.</p>`}
+  ${lock.length?`<div class="sec"><h3 style="font-size:16px;color:var(--mut)">Bloqueadas</h3></div>
+  <div class="ms">${lock.map(m=>`<button disabled style="opacity:.5;cursor:default"><i class="ti ti-lock" style="color:var(--mut)"></i><span><b>${esc(m.t)}</b><small>Precisa de um canal sobre ${esc(m.t.toLowerCase())}</small></span></button>`).join('')}</div>
+  <p class="hint" style="padding:0 max(4vw,14px)">Para liberar, um responsável aprova em “Pais” um canal de aprendizado que fale desses temas.</p>`:''}</div>`;
 }
 function missionView(id){
-  const m=MISSIONS.find(x=>x.id===id);if(!m)return;const v=missVideo(m);
+  const m=MISSIONS.find(x=>x.id===id);if(!m)return;const v=missVideo(m);if(!v){missionsView();return}
   $('grid').className='';
   $('grid').innerHTML=`<div style="grid-column:1/-1" class="mi">
    <button id="miBack" style="margin:14px 0 4px;background:none;padding:0;color:var(--mut)"><i class="ti ti-arrow-left"></i> Missões</button>
    <h2 style="margin:4px 0 4px;font-size:28px"><i class="ti ti-${m.ico}" style="color:var(--acc)"></i> ${esc(m.t)}</h2>
-   <h4>1. Assista um vídeo sobre o tema</h4>${v?`<div style="max-width:360px">${card(v)}</div>`:'<p class="hint">Ainda não há um vídeo sobre este tema nos canais de aprendizado aprovados. Peça para um responsável aprovar um canal sobre '+esc(m.t.toLowerCase())+'. Você pode fazer o resto da missão mesmo assim.</p>'}
+   <h4>1. Assista um vídeo sobre o tema</h4><div style="max-width:360px">${card(v)}</div>
    <h4>2. Responda sobre o tema</h4><p class="hint" style="margin-top:-4px">As perguntas são sobre o assunto em geral. Nem sempre a resposta está no vídeo: use o que você já sabe ou pesquise.</p>${m.q.map((q,qi)=>`<div class="qz" data-q="${qi}"><p>${esc(q[0])}</p>${q[1].map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}">${esc(o)}</label>`).join('')}</div>`).join('')}
    <h4>3. Desafio em casa</h4><div class="dc"><p style="margin:0 0 10px">${esc(m.d)}</p><label class="chk" style="margin:0"><input type="checkbox" id="miDone"> Fiz o desafio!</label></div>
    <p class="hint" id="miMsg"></p>
@@ -568,6 +573,7 @@ function missionDone(id){
   m.q.forEach((q,qi)=>{const sel=document.querySelector(`input[name=q${qi}]:checked`);const box=document.querySelector(`.qz[data-q="${qi}"]`);
     box.querySelectorAll('label').forEach(l=>l.classList.remove('right','wrong'));
     if(!sel){all=false;return}const ok2=+sel.value===q[2];if(ok2)right++;sel.closest('label').classList.add(ok2?'right':'wrong')});
+  const vv=missVideo(m);if(vv&&!done.some(x=>x.id===vv.id)&&!(prog[vv.id]&&prog[vv.id].d&&prog[vv.id].t>=prog[vv.id].d*0.9)){$('miMsg').textContent='Primeiro assista ao vídeo até o fim.';return}
   if(!all){$('miMsg').textContent='Responda as 3 perguntas.';return}
   if(right<2){$('miMsg').textContent='Você acertou '+right+' de 3. Tente de novo!';return}
   if(!$('miDone').checked){$('miMsg').textContent='Falta fazer o desafio em casa e marcar “Fiz o desafio!”.';return}

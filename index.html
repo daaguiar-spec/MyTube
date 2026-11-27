@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="CasuloPlay">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127181502">
+<meta name="mt-build" content="20261127181945">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -232,8 +232,8 @@ header h1{margin-right:auto;order:1}
   <label for="cLim">Limite de tempo por dia</label>
   <select id="cLim"><option value="0">Sem limite</option><option value="30">30 minutos</option><option value="60">1 hora</option><option value="90">1h30</option><option value="120">2 horas</option><option value="180">3 horas</option></select>
   <p class="hint" id="cUsed"></p>
-  <label class="chk"><input type="checkbox" id="cPt"> Esconder vídeos estrangeiros sem versão em português</label>
-  <p class="hint">Vídeos estrangeiros com título traduzido continuam aparecendo, já em português e com legenda em português ligada.</p>
+  <label class="chk"><input type="checkbox" id="cPt"> Mostrar só vídeos com título em português</label>
+  <p class="hint">Vem ligado. Esconde vídeos com título em inglês, inclusive nas buscas e nos canais aprovados. Vídeos estrangeiros com título traduzido continuam aparecendo.</p>
   <label class="chk"><input type="checkbox" id="cOpen"> Permitir busca em todo o YouTube (SafeSearch estrito)</label>
   <p class="hint">Desligado: a busca só procura nos canais aprovados.</p>
   <label for="cPin">PIN dos pais</label>
@@ -290,8 +290,12 @@ const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''
 const cats=()=>cfg.cats.split('\n').map(l=>{const i=l.indexOf(':');if(i<0)return null;return{name:l.slice(0,i).trim(),ch:l.slice(i+1).split(',').map(s=>s.trim()).filter(Boolean)}}).filter(c=>c&&c.name);
 const msg=t=>$('msg').textContent=t||'';
 
+const PTW=/\b(de|do|da|dos|das|que|n[aã]o|um|uma|com|para|pra|os|as|no|na|nos|em|eu|voc[eê]|meu|minha|como|mais|por|sobre|isso|esse|essa|foi|tem|vou|fiz|sobrevivi|horas|dias)\b/gi;
+const ENW=/\b(the|in|of|to|and|i|my|with|vs|you|how|what|is|are|for|on|at|this|that|it|we|our|your|from|tested|surviving|hours|days|challenge|best|world|every|last|first)\b/gi;
+function looksEnglish(t){t=String(t||'');if(/[ãõçáéíóúâêôà]/i.test(t))return false;const e=(t.match(ENW)||[]).length,p=(t.match(PTW)||[]).length;return e>=1&&e>p}
+const ptOnly=()=>cfg.ptOnly!==false;
 function ok(v){
-  if(cfg.ptOnly&&v.lang&&v.ptVer===false)return false;
+  if(ptOnly()&&!v.ptNative&&looksEnglish(v.title))return false;
   if(v.dur!=null){if(minD()&&v.dur<minD())return false;if(maxD()&&v.dur>maxD()*60)return false}
   if(cfg.bch.split(/[\s,]+/).includes(v.chId))return false;
   const t=norm(v.title+' '+v.desc);
@@ -698,7 +702,7 @@ function renderHist(){
 }
 function openCfg(){
   $('cMin').value=String(minD());$('cMax').value=String(maxD());$('cLim').value=String(lim());renderHist();
-  $('cKey').value=cfg.key;$('cCats').value=cfg.cats;$('cWords').value=cfg.words;$('cBch').value=cfg.bch;$('cOpen').checked=cfg.open;$('cPt').checked=!!cfg.ptOnly;$('cPin').value='';$('cName').value=cfg.kidName||'';$('cApp').value=cfg.appName||'';$('cAva').value='';try{$('cAvaPrev').src=localStorage.getItem('mt_avatar')||''}catch(e){}
+  $('cKey').value=cfg.key;$('cCats').value=cfg.cats;$('cWords').value=cfg.words;$('cBch').value=cfg.bch;$('cOpen').checked=cfg.open;$('cPt').checked=ptOnly();$('cPin').value='';$('cName').value=cfg.kidName||'';$('cApp').value=cfg.appName||'';$('cAva').value='';try{$('cAvaPrev').src=localStorage.getItem('mt_avatar')||''}catch(e){}
   $('cfg').classList.add('show');refreshCats();
 }
 const validPin=p=>/^\d{4,8}$/.test(p);
@@ -824,7 +828,7 @@ $('cImp').onclick=()=>{
     t=t.replace(/-/g,'+').replace(/_/g,'/').replace(/[^A-Za-z0-9+\/]/g,'');while(t.length%4)t+='=';
     const bin=atob(t);const c=JSON.parse(new TextDecoder().decode(Uint8Array.from(bin,ch=>ch.charCodeAt(0))));
     if(typeof c.cats!=='string')throw 0;
-    cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,ptOnly:!!c.ptOnly,pin:validPin(c.pin||'')?c.pin:cfg.pin,minDur:c.minDur??181,maxDur:c.maxDur??0,limit:c.limit??0,kidName:c.kidName||cfg.kidName||'',appName:c.appName||cfg.appName||''};
+    cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,ptOnly:c.ptOnly!==false,pin:validPin(c.pin||'')?c.pin:cfg.pin,minDur:c.minDur??181,maxDur:c.maxDur??0,limit:c.limit??0,kidName:c.kidName||cfg.kidName||'',appName:c.appName||cfg.appName||''};
     save('mt_cfg',cfg);feed={};save('mt_feed4',feed);
     $('cMsg').textContent='Configuração aplicada!';
     openCfg();openCat(-1,true);

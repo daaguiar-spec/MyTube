@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>SixSeven Tube</title>
+<title>Casulo Play</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="SixSeven Tube">
+<meta name="apple-mobile-web-app-title" content="Casulo Play">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127095330">
+<meta name="mt-build" content="20261127122151">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -101,7 +101,7 @@ header h1{margin-right:auto;order:1}
 </head>
 <body>
 <header>
-  <h1>SixSeven <b>Tube</b></h1>
+  <h1>Casulo <b>Play</b></h1>
   <input id="q" type="search" placeholder="Pesquisar vídeos…" aria-label="Pesquisar">
   <button id="bPais" class="mini" aria-label="Filtro Pais"><i class="ti ti-lock"></i> Pais</button>
 </header>
@@ -529,7 +529,7 @@ function payCheck(){
   if(ok){$('pay').classList.remove('show');return}
   $('payBuy').href=CHECKOUT_URL||'#';
   $('payLogin').style.display=u?'none':'';
-  $('payT').textContent=!u?'Bem-vindo ao SixSeven Tube':subInfo.data&&subInfo.data.status==='atrasada'?'Pagamento pendente':'Assinatura necessária';
+  $('payT').textContent=!u?'Bem-vindo ao Casulo Play':subInfo.data&&subInfo.data.status==='atrasada'?'Pagamento pendente':'Assinatura necessária';
   $('payTxt').textContent=!u?'Assine para liberar o app ou entre na conta da família se você já assinou.':subInfo.data&&subInfo.data.status==='atrasada'?'Há um pagamento em aberto. Regularize na Kiwify para continuar usando.':'Não encontramos uma assinatura ativa para '+(u.email||'esta conta')+'.';
   $('pay').classList.add('show');
 }

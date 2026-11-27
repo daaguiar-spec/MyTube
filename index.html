@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="CasuloPlay">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127164904">
+<meta name="mt-build" content="20261127170221">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -457,7 +457,11 @@ const MISSIONS=[
   d:'Escreva o “algoritmo” para fazer um sanduíche, passo a passo. Peça para alguém seguir exatamente o que você escreveu, ao pé da letra. Funcionou?'}
 ];
 let STORIES=[],storyDone=load('mt_stories',{}),stNow=null;
-fetch('stories.json').then(r=>r.json()).then(j=>{STORIES=j}).catch(()=>{});
+let stStart=load('mt_ststart',0);if(!stStart){stStart=Date.now();save('mt_ststart',stStart)}
+const stWeek=()=>Math.floor((Date.now()-stStart)/(7*864e5));
+const stAvail=()=>STORIES.filter(x=>(x.w||0)<=stWeek());
+fetch('stories.json').then(r=>r.json()).then(j=>{STORIES=j;const n=stAvail().length,seen=load('mt_stseen',0);
+  if(seen&&n>seen)setTimeout(()=>toast('Nova história disponível!','book'),2500);save('mt_stseen',n)}).catch(()=>{});
 const endsFound=()=>Object.values(storyDone).reduce((a,x)=>a+(x.ends||[]).length,0);
 const MEDALS=[
  ['historias','book','Contador de histórias','Descubra 5 finais de histórias',()=>endsFound(),5],
@@ -607,8 +611,8 @@ function missionDone(id){
 function storiesView(){
   $('grid').className='';
   $('grid').innerHTML=`<div style="grid-column:1/-1"><div class="mi"><button id="miBack" style="margin:14px 0 4px;background:none;padding:0;color:var(--mut)"><i class="ti ti-arrow-left"></i> Missões</button>
-  <h2 style="margin:4px 0 6px;font-size:28px"><i class="ti ti-book" style="color:var(--acc)"></i> Histórias de escolha</h2><p class="hint">Você decide o caminho. Cada história tem vários finais: tente descobrir todos!</p></div>
-  <div class="ms">${STORIES.map(st=>{const tot=Object.values(st.n).filter(x=>x.end).length,f=(storyDone[st.id]&&storyDone[st.id].ends||[]).length;
+  <h2 style="margin:4px 0 6px;font-size:28px"><i class="ti ti-book" style="color:var(--acc)"></i> Histórias de escolha</h2><p class="hint">Você decide o caminho. Cada história tem vários finais: tente descobrir todos!${STORIES.length>stAvail().length?' Uma história nova é liberada toda semana; a próxima chega em '+Math.max(1,Math.ceil((stStart+(stWeek()+1)*7*864e5-Date.now())/864e5))+' dia(s).':''}</p></div>
+  <div class="ms">${stAvail().slice().reverse().map(st=>{const tot=Object.values(st.n).filter(x=>x.end).length,f=(storyDone[st.id]&&storyDone[st.id].ends||[]).length;
    return `<button data-st="${st.id}"><i class="ti ti-${st.ico}"></i><span><b>${esc(st.t)}</b><small>${esc(st.sub)} · ${f}/${tot} finais</small></span></button>`}).join('')||'<p class="hint">Carregando…</p>'}</div></div>`;
 }
 function storyNode(id,k){

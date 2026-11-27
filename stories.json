@@ -1,31 +1,1024 @@
 [
- {"id":"lab","t":"O mistério do laboratório","ico":"flask","sub":"Mistério na escola","start":"a","n":{
-  "a":{"txt":"Segunda-feira, 7h40. Você chega à escola e encontra a porta do laboratório de ciências entreaberta. Lá dentro, o microscópio novo da professora Helena sumiu. No chão, há pegadas de terra molhada indo em direção à janela, e um bilhete dobrado em cima da bancada.","ch":[["Ler o bilhete","b"],["Seguir as pegadas","c"]]},
-  "b":{"txt":"O bilhete diz, em letras recortadas de revista: “A resposta está onde as plantas bebem.” Que estranho. Na escola há dois lugares com plantas: a horta, nos fundos, e o jardim de inverno, perto da biblioteca.","ch":[["Ir até a horta","d"],["Ir ao jardim de inverno","e"]]},
-  "c":{"txt":"As pegadas passam pela janela e seguem pela grama até a horta. Lá, você vê o zelador, seu Antônio, regando os canteiros. Ele parece calmo, mas as botas dele estão cheias de terra molhada.","ch":[["Perguntar direto se foi ele","f"],["Observar sem falar nada","d"]]},
-  "d":{"txt":"Perto do regador da horta, você nota uma caixa de papelão escondida embaixo de um saco de adubo. Dentro dela está o microscópio, embrulhado com cuidado num pano. E um segundo bilhete: “Parabéns, detetive! Agora descubra QUEM fez isso.” Alguém está jogando com você.","ch":[["Levar o microscópio para a professora","g"],["Investigar a letra do bilhete","h"]]},
-  "e":{"txt":"No jardim de inverno não há nada além de samambaias e um bebedouro. Você perdeu tempo, mas percebe uma coisa: o bebedouro é onde as PESSOAS bebem, não as plantas. As plantas bebem na horta, onde fica o regador!","ch":[["Correr até a horta","d"]]},
-  "f":{"txt":"Seu Antônio dá risada: “Eu? Eu estava aqui desde as seis da manhã regando a horta, por isso minhas botas estão assim.” Ele aponta para a câmera do pátio. “Quer conferir? Mas olha, vi alguém de mochila azul passar correndo por aqui mais cedo.”","ch":[["Pedir desculpas e procurar perto da horta","d"]]},
-  "g":{"txt":"A professora Helena abre um sorriso enorme. “Você encontrou! Na verdade… fui eu que escondi. Era um teste para escolher quem vai representar a turma na Feira de Ciências como detetive-cientista.” Você foi escolhido! Observar, levantar hipóteses e testar: isso é ciência.","end":"bom"},
-  "h":{"txt":"Você compara as letras recortadas com as revistas da sala dos professores e encontra uma revista de ciência com buracos exatamente do tamanho das letras. Na capa, uma etiqueta: “Prof.ª Helena”. Você leva tudo até ela, que fica impressionada: “Você descobriu até o autor do mistério! Isso é investigação de verdade.” Você ganha o título de Detetive da Turma.","end":"otimo"}
- }},
- {"id":"orion","t":"Estação Órion","ico":"rocket","sub":"Ficção científica no espaço","start":"a","n":{
-  "a":{"txt":"Ano 2142. Você é o cadete mais jovem da Estação Órion, que orbita Marte. De repente, um alarme toca: “Falha no sistema de oxigênio do módulo B.” A comandante está dormindo e o engenheiro-chefe está em missão fora da estação.","ch":[["Acordar a comandante","b"],["Ir sozinho até o módulo B","c"]]},
-  "b":{"txt":"A comandante Luana acorda num pulo. “Bom trabalho em me avisar. Em emergência, nunca se age sozinho.” Ela consulta o painel: o filtro de oxigênio está entupido. “Temos duas opções: trocar o filtro, que fica do lado de fora da estação, ou desviar o oxigênio do módulo A, mas aí o laboratório fica sem ar por algumas horas.”","ch":[["Trocar o filtro do lado de fora","d"],["Desviar o oxigênio do módulo A","e"]]},
-  "c":{"txt":"Você chega ao módulo B e o ar está ficando rarefeito. Sua cabeça começa a doer. O painel pisca em vermelho, cheio de botões que você nunca usou.","ch":[["Apertar o botão maior","f"],["Voltar e chamar a comandante","b"]]},
-  "d":{"txt":"Você veste o traje espacial e sai pela escotilha, preso por um cabo de segurança. Lá fora, Marte brilha enorme e alaranjado. O filtro está coberto de poeira marciana. Você o troca com cuidado, seguindo o passo a passo que a comandante dita pelo rádio.","ch":[["Voltar para dentro","g"]]},
-  "e":{"txt":"O oxigênio é desviado e o módulo B volta a respirar. Mas no laboratório havia um experimento com plantas que precisava de ar. Ao amanhecer, metade das mudas murchou. A estação está segura, mas a pesquisa de cultivo em Marte atrasou meses.","end":"neutro"},
-  "f":{"txt":"O botão maior era o de travar as portas. Agora você está preso no módulo B! Felizmente, o sistema detecta a falha e acorda a comandante automaticamente. Ela abre a porta pelo painel central e te resgata. “Lição número um: nunca aperte o que você não conhece.”","ch":[["Ajudar a comandante a consertar","b"]]},
-  "g":{"txt":"De volta à estação, o oxigênio volta ao normal em todos os módulos e as plantas do laboratório continuam vivas. A comandante aperta sua mão: “Você manteve a calma, pediu ajuda e seguiu o procedimento. Isso é ser um verdadeiro astronauta.” Você é promovido a tenente.","end":"otimo"}
- }},
- {"id":"serra","t":"A trilha da serra","ico":"mountain","sub":"Aventura na natureza","start":"a","n":{
-  "a":{"txt":"Férias na serra com seus primos. Vocês seguem uma trilha até uma cachoeira famosa, com mapa e lanterna na mochila. Depois de uma hora de caminhada, a trilha se divide em duas: uma placa velha aponta para a esquerda, mas um caminho mais largo segue para a direita.","ch":[["Seguir a placa, à esquerda","b"],["Pegar o caminho largo, à direita","c"]]},
-  "b":{"txt":"O caminho da esquerda é estreito, mas bem marcado com fitas coloridas nas árvores. Vocês ouvem um barulho de água ao longe. No meio do trilho, um filhote de passarinho está caído no chão, piando.","ch":[["Pegar o filhote e levar junto","d"],["Procurar o ninho e deixar o filhote perto","e"]]},
-  "c":{"txt":"O caminho largo vai ficando cada vez mais fechado, até sumir no meio do mato. O sol começa a baixar e ninguém sabe mais onde está a trilha.","ch":[["Voltar pelo mesmo caminho até a placa","b"],["Continuar em frente pelo mato","f"]]},
-  "d":{"txt":"Você leva o filhote na mão, mas ele fica cada vez mais assustado. Na cachoeira, um guarda-parque explica: “Filhotes que caem quase sempre têm os pais por perto. Tirando ele de lá, ficou mais difícil os pais o encontrarem.” Ele leva o passarinho para um centro de resgate. A cachoeira é linda, mas fica a lição.","end":"neutro"},
-  "e":{"txt":"Você encontra o ninho num galho baixo e, com cuidado, deixa o filhote em cima de um tronco ali perto. Logo os pais aparecem e começam a alimentá-lo. Seus primos ficam impressionados. Mais à frente, a trilha termina numa cachoeira enorme, com um poço de água cristalina.","ch":[["Nadar no poço","g"],["Explorar atrás da cachoeira","h"]]},
-  "f":{"txt":"Vocês andam no meio do mato até escurecer e percebem que estão perdidos. Por sorte, seu primo mais velho lembra a regra de ouro: quando se perder, pare num lugar aberto e peça ajuda. Vocês acendem as lanternas e, horas depois, uma equipe de resgate encontra todos. Ninguém se machucou, mas a cachoeira fica para outro dia.","end":"ruim"},
-  "g":{"txt":"A água está gelada e deliciosa. Vocês fazem um lanche nas pedras e voltam pela trilha marcada antes do pôr do sol, cansados e felizes. Um dia perfeito.","end":"bom"},
-  "h":{"txt":"Atrás da cortina de água existe uma pequena gruta. Nas paredes, desenhos muito antigos de animais e pessoas, pintados em vermelho. Vocês tiram fotos sem tocar em nada e avisam o guarda-parque, que fica de boca aberta: são pinturas rupestres que nunca tinham sido registradas! Seus nomes vão aparecer no relatório dos arqueólogos.","end":"otimo"}
- }}
+{
+"id": "lab",
+"t": "O mistério do laboratório",
+"ico": "flask",
+"sub": "Mistério na escola",
+"start": "a",
+"n": {
+"a": {
+"txt": "Segunda-feira, 7h40. Você chega à escola e encontra a porta do laboratório de ciências entreaberta. Lá dentro, o microscópio novo da professora Helena sumiu. No chão, há pegadas de terra molhada indo em direção à janela, e um bilhete dobrado em cima da bancada.",
+"ch": [
+[
+"Ler o bilhete",
+"b"
+],
+[
+"Seguir as pegadas",
+"c"
+]
+]
+},
+"b": {
+"txt": "O bilhete diz, em letras recortadas de revista: “A resposta está onde as plantas bebem.” Que estranho. Na escola há dois lugares com plantas: a horta, nos fundos, e o jardim de inverno, perto da biblioteca.",
+"ch": [
+[
+"Ir até a horta",
+"d"
+],
+[
+"Ir ao jardim de inverno",
+"e"
+]
+]
+},
+"c": {
+"txt": "As pegadas passam pela janela e seguem pela grama até a horta. Lá, você vê o zelador, seu Antônio, regando os canteiros. Ele parece calmo, mas as botas dele estão cheias de terra molhada.",
+"ch": [
+[
+"Perguntar direto se foi ele",
+"f"
+],
+[
+"Observar sem falar nada",
+"d"
+]
+]
+},
+"d": {
+"txt": "Perto do regador da horta, você nota uma caixa de papelão escondida embaixo de um saco de adubo. Dentro dela está o microscópio, embrulhado com cuidado num pano. E um segundo bilhete: “Parabéns, detetive! Agora descubra QUEM fez isso.” Alguém está jogando com você.",
+"ch": [
+[
+"Levar o microscópio para a professora",
+"g"
+],
+[
+"Investigar a letra do bilhete",
+"h"
+]
+]
+},
+"e": {
+"txt": "No jardim de inverno não há nada além de samambaias e um bebedouro. Você perdeu tempo, mas percebe uma coisa: o bebedouro é onde as PESSOAS bebem, não as plantas. As plantas bebem na horta, onde fica o regador!",
+"ch": [
+[
+"Correr até a horta",
+"d"
+]
+]
+},
+"f": {
+"txt": "Seu Antônio dá risada: “Eu? Eu estava aqui desde as seis da manhã regando a horta, por isso minhas botas estão assim.” Ele aponta para a câmera do pátio. “Quer conferir? Mas olha, vi alguém de mochila azul passar correndo por aqui mais cedo.”",
+"ch": [
+[
+"Pedir desculpas e procurar perto da horta",
+"d"
+]
+]
+},
+"g": {
+"txt": "A professora Helena abre um sorriso enorme. “Você encontrou! Na verdade… fui eu que escondi. Era um teste para escolher quem vai representar a turma na Feira de Ciências como detetive-cientista.” Você foi escolhido! Observar, levantar hipóteses e testar: isso é ciência.",
+"end": "bom"
+},
+"h": {
+"txt": "Você compara as letras recortadas com as revistas da sala dos professores e encontra uma revista de ciência com buracos exatamente do tamanho das letras. Na capa, uma etiqueta: “Prof.ª Helena”. Você leva tudo até ela, que fica impressionada: “Você descobriu até o autor do mistério! Isso é investigação de verdade.” Você ganha o título de Detetive da Turma.",
+"end": "otimo"
+}
+},
+"w": 0
+},
+{
+"id": "orion",
+"t": "Estação Órion",
+"ico": "rocket",
+"sub": "Ficção científica no espaço",
+"start": "a",
+"n": {
+"a": {
+"txt": "Ano 2142. Você é o cadete mais jovem da Estação Órion, que orbita Marte. De repente, um alarme toca: “Falha no sistema de oxigênio do módulo B.” A comandante está dormindo e o engenheiro-chefe está em missão fora da estação.",
+"ch": [
+[
+"Acordar a comandante",
+"b"
+],
+[
+"Ir sozinho até o módulo B",
+"c"
+]
+]
+},
+"b": {
+"txt": "A comandante Luana acorda num pulo. “Bom trabalho em me avisar. Em emergência, nunca se age sozinho.” Ela consulta o painel: o filtro de oxigênio está entupido. “Temos duas opções: trocar o filtro, que fica do lado de fora da estação, ou desviar o oxigênio do módulo A, mas aí o laboratório fica sem ar por algumas horas.”",
+"ch": [
+[
+"Trocar o filtro do lado de fora",
+"d"
+],
+[
+"Desviar o oxigênio do módulo A",
+"e"
+]
+]
+},
+"c": {
+"txt": "Você chega ao módulo B e o ar está ficando rarefeito. Sua cabeça começa a doer. O painel pisca em vermelho, cheio de botões que você nunca usou.",
+"ch": [
+[
+"Apertar o botão maior",
+"f"
+],
+[
+"Voltar e chamar a comandante",
+"b"
+]
+]
+},
+"d": {
+"txt": "Você veste o traje espacial e sai pela escotilha, preso por um cabo de segurança. Lá fora, Marte brilha enorme e alaranjado. O filtro está coberto de poeira marciana. Você o troca com cuidado, seguindo o passo a passo que a comandante dita pelo rádio.",
+"ch": [
+[
+"Voltar para dentro",
+"g"
+]
+]
+},
+"e": {
+"txt": "O oxigênio é desviado e o módulo B volta a respirar. Mas no laboratório havia um experimento com plantas que precisava de ar. Ao amanhecer, metade das mudas murchou. A estação está segura, mas a pesquisa de cultivo em Marte atrasou meses.",
+"end": "neutro"
+},
+"f": {
+"txt": "O botão maior era o de travar as portas. Agora você está preso no módulo B! Felizmente, o sistema detecta a falha e acorda a comandante automaticamente. Ela abre a porta pelo painel central e te resgata. “Lição número um: nunca aperte o que você não conhece.”",
+"ch": [
+[
+"Ajudar a comandante a consertar",
+"b"
+]
+]
+},
+"g": {
+"txt": "De volta à estação, o oxigênio volta ao normal em todos os módulos e as plantas do laboratório continuam vivas. A comandante aperta sua mão: “Você manteve a calma, pediu ajuda e seguiu o procedimento. Isso é ser um verdadeiro astronauta.” Você é promovido a tenente.",
+"end": "otimo"
+}
+},
+"w": 0
+},
+{
+"id": "serra",
+"t": "A trilha da serra",
+"ico": "mountain",
+"sub": "Aventura na natureza",
+"start": "a",
+"n": {
+"a": {
+"txt": "Férias na serra com seus primos. Vocês seguem uma trilha até uma cachoeira famosa, com mapa e lanterna na mochila. Depois de uma hora de caminhada, a trilha se divide em duas: uma placa velha aponta para a esquerda, mas um caminho mais largo segue para a direita.",
+"ch": [
+[
+"Seguir a placa, à esquerda",
+"b"
+],
+[
+"Pegar o caminho largo, à direita",
+"c"
+]
+]
+},
+"b": {
+"txt": "O caminho da esquerda é estreito, mas bem marcado com fitas coloridas nas árvores. Vocês ouvem um barulho de água ao longe. No meio do trilho, um filhote de passarinho está caído no chão, piando.",
+"ch": [
+[
+"Pegar o filhote e levar junto",
+"d"
+],
+[
+"Procurar o ninho e deixar o filhote perto",
+"e"
+]
+]
+},
+"c": {
+"txt": "O caminho largo vai ficando cada vez mais fechado, até sumir no meio do mato. O sol começa a baixar e ninguém sabe mais onde está a trilha.",
+"ch": [
+[
+"Voltar pelo mesmo caminho até a placa",
+"b"
+],
+[
+"Continuar em frente pelo mato",
+"f"
+]
+]
+},
+"d": {
+"txt": "Você leva o filhote na mão, mas ele fica cada vez mais assustado. Na cachoeira, um guarda-parque explica: “Filhotes que caem quase sempre têm os pais por perto. Tirando ele de lá, ficou mais difícil os pais o encontrarem.” Ele leva o passarinho para um centro de resgate. A cachoeira é linda, mas fica a lição.",
+"end": "neutro"
+},
+"e": {
+"txt": "Você encontra o ninho num galho baixo e, com cuidado, deixa o filhote em cima de um tronco ali perto. Logo os pais aparecem e começam a alimentá-lo. Seus primos ficam impressionados. Mais à frente, a trilha termina numa cachoeira enorme, com um poço de água cristalina.",
+"ch": [
+[
+"Nadar no poço",
+"g"
+],
+[
+"Explorar atrás da cachoeira",
+"h"
+]
+]
+},
+"f": {
+"txt": "Vocês andam no meio do mato até escurecer e percebem que estão perdidos. Por sorte, seu primo mais velho lembra a regra de ouro: quando se perder, pare num lugar aberto e peça ajuda. Vocês acendem as lanternas e, horas depois, uma equipe de resgate encontra todos. Ninguém se machucou, mas a cachoeira fica para outro dia.",
+"end": "ruim"
+},
+"g": {
+"txt": "A água está gelada e deliciosa. Vocês fazem um lanche nas pedras e voltam pela trilha marcada antes do pôr do sol, cansados e felizes. Um dia perfeito.",
+"end": "bom"
+},
+"h": {
+"txt": "Atrás da cortina de água existe uma pequena gruta. Nas paredes, desenhos muito antigos de animais e pessoas, pintados em vermelho. Vocês tiram fotos sem tocar em nada e avisam o guarda-parque, que fica de boca aberta: são pinturas rupestres que nunca tinham sido registradas! Seus nomes vão aparecer no relatório dos arqueólogos.",
+"end": "otimo"
+}
+},
+"w": 0
+},
+{
+"id": "robo",
+"t": "O robô que não obedecia",
+"ico": "robot",
+"sub": "Tecnologia e lógica",
+"start": "a",
+"n": {
+"a": {
+"txt": "Na feira de tecnologia da escola, seu robô de papelão com motor precisa atravessar um labirinto. Na hora da apresentação, ele vira para a esquerda em vez de ir em frente. A plateia ri.",
+"ch": [
+[
+"Desligar e tentar de novo",
+"b"
+],
+[
+"Abrir o código no notebook",
+"c"
+]
+]
+},
+"b": {
+"txt": "Você liga de novo e ele faz exatamente o mesmo erro. Repetir sem mudar nada dá o mesmo resultado. Um colega sussurra: \"Será que é o código?\"",
+"ch": [
+[
+"Abrir o código",
+"c"
+]
+]
+},
+"c": {
+"txt": "No código, você encontra a linha: \"virar 90 graus\". Mas o labirinto exige ir em frente primeiro. Você também nota que a roda direita está mais solta que a esquerda.",
+"ch": [
+[
+"Corrigir a ordem dos comandos",
+"d"
+],
+[
+"Apertar a roda solta",
+"e"
+]
+]
+},
+"d": {
+"txt": "Com a ordem corrigida, o robô vai em frente… mas vai puxando para a direita até bater na parede. Ainda falta alguma coisa.",
+"ch": [
+[
+"Apertar a roda solta",
+"f"
+]
+]
+},
+"e": {
+"txt": "Com a roda firme, ele anda reto, mas continua virando cedo demais. O problema tinha duas partes.",
+"ch": [
+[
+"Corrigir a ordem dos comandos",
+"f"
+]
+]
+},
+"f": {
+"txt": "Código corrigido e roda firme: o robô atravessa o labirinto inteiro e a plateia aplaude. O juiz comenta: \"Você encontrou dois bugs, um no programa e um na máquina. É assim que engenheiros trabalham.\" Você leva o prêmio de melhor depuração.",
+"end": "otimo"
+}
+},
+"w": 1
+},
+{
+"id": "cerrado",
+"t": "O lobo-guará da fazenda",
+"ico": "paw",
+"sub": "Animais do Brasil",
+"start": "a",
+"n": {
+"a": {
+"txt": "Nas férias, na fazenda do seu tio no Cerrado, você vê ao entardecer um animal alto, de pernas longas e pelo alaranjado, perto do pomar. Seu primo grita: \"É uma raposa! Vai comer as galinhas!\"",
+"ch": [
+[
+"Correr para espantar o bicho",
+"b"
+],
+[
+"Observar de longe",
+"c"
+]
+]
+},
+"b": {
+"txt": "Você corre gritando e o animal some no mato. Seu tio chega e balança a cabeça: \"Era um lobo-guará. Ele é tímido e come muitas frutas, como a lobeira. Assustar não ajuda, só faz ele perder o caminho até a comida.\"",
+"ch": [
+[
+"Pedir para ver de novo amanhã",
+"c"
+]
+]
+},
+"c": {
+"txt": "Em silêncio, vocês observam. O animal come frutas caídas do pomar e ignora o galinheiro. Seu tio explica que o lobo-guará é o maior canídeo da América do Sul e está ameaçado, principalmente pela perda do Cerrado.",
+"ch": [
+[
+"Fotografar e mandar para pesquisadores",
+"d"
+],
+[
+"Contar só para os amigos",
+"e"
+]
+]
+},
+"d": {
+"txt": "Você envia as fotos a um projeto de pesquisa sobre lobos-guarás. Semanas depois, chega uma resposta: o animal já era acompanhado pelos cientistas, e sua foto ajudou a mostrar que ele está saudável. Você ganha um certificado de cientista cidadão.",
+"end": "otimo"
+},
+"e": {
+"txt": "Seus amigos adoram as fotos e todos aprendem que o lobo-guará não é uma raposa nem ataca galinhas. Uma boa descoberta para a turma.",
+"end": "bom"
+}
+},
+"w": 2
+},
+{
+"id": "tempo",
+"t": "A máquina do tempo de 1822",
+"ico": "clock",
+"sub": "História do Brasil",
+"start": "a",
+"n": {
+"a": {
+"txt": "No museu, você encosta num relógio antigo e, de repente, está numa rua de terra. As pessoas usam roupas do século 19. Um cartaz diz: \"São Paulo, setembro de 1822\".",
+"ch": [
+[
+"Perguntar a alguém o que está acontecendo",
+"b"
+],
+[
+"Seguir uma comitiva de cavalos",
+"c"
+]
+]
+},
+"b": {
+"txt": "Uma vendedora de frutas explica que o príncipe regente, Dom Pedro, está voltando de Santos. Há conflito com Portugal, que quer que ele volte para Lisboa.",
+"ch": [
+[
+"Seguir a comitiva",
+"c"
+]
+]
+},
+"c": {
+"txt": "Perto do riacho do Ipiranga, Dom Pedro recebe cartas de Portugal e lê em silêncio. Os soldados comentam que as ordens são duras e que o Brasil pode perder sua autonomia.",
+"ch": [
+[
+"Ficar para ver o que acontece",
+"d"
+],
+[
+"Tentar contar a ele o futuro",
+"e"
+]
+]
+},
+"d": {
+"txt": "Dom Pedro levanta a espada e anuncia a separação de Portugal. É 7 de setembro de 1822. Você presencia um momento que vai estudar nos livros! O relógio brilha e você volta ao museu, a tempo da excursão.",
+"end": "otimo"
+},
+"e": {
+"txt": "Você tenta falar com ele, mas um guarda te afasta: \"Criança, não atrapalhe!\" O relógio brilha de novo e você volta ao museu. Uma lição: na história, observar também é aprender.",
+"end": "neutro"
+}
+},
+"w": 3
+},
+{
+"id": "oceano",
+"t": "Mergulho no recife",
+"ico": "fish",
+"sub": "Vida no oceano",
+"start": "a",
+"n": {
+"a": {
+"txt": "Numa viagem a Abrolhos, na Bahia, você faz seu primeiro mergulho de snorkel com uma bióloga. A água é cristalina e cheia de peixes coloridos.",
+"ch": [
+[
+"Nadar até os corais",
+"b"
+],
+[
+"Seguir uma tartaruga",
+"c"
+]
+]
+},
+"b": {
+"txt": "Os corais parecem pedras, mas a bióloga explica que são animais, formados por pequenos pólipos. Você vê uma parte branca, sem cor.",
+"ch": [
+[
+"Perguntar por que está branco",
+"d"
+],
+[
+"Tocar no coral",
+"e"
+]
+]
+},
+"c": {
+"txt": "A tartaruga nada devagar e você fica a uma distância segura. A bióloga faz sinal de positivo: chegar perto demais estressa o animal. Ela aponta para os corais.",
+"ch": [
+[
+"Ir até os corais",
+"b"
+]
+]
+},
+"d": {
+"txt": "\"Isso é branqueamento\", explica a bióloga. \"Quando a água fica quente demais, o coral perde as algas que dão cor e alimento a ele.\" Ela mostra como os cientistas monitoram o recife.",
+"end": "otimo"
+},
+"e": {
+"txt": "A bióloga segura seu braço com cuidado: tocar machuca o coral e algumas espécies queimam a pele. Você entende o recado e continua só olhando. O passeio continua lindo.",
+"end": "bom"
+}
+},
+"w": 4
+},
+{
+"id": "hacker",
+"t": "A senha esquecida",
+"ico": "lock",
+"sub": "Segurança na internet",
+"start": "a",
+"n": {
+"a": {
+"txt": "Você recebe uma mensagem no celular: \"Você ganhou 10.000 moedas no seu jogo! Clique no link e digite sua senha para receber.\"",
+"ch": [
+[
+"Clicar no link",
+"b"
+],
+[
+"Mostrar para um adulto",
+"c"
+]
+]
+},
+"b": {
+"txt": "O site parece igual ao do jogo, mas o endereço tem uma letra trocada. Ele pede seu usuário e senha.",
+"ch": [
+[
+"Digitar a senha",
+"d"
+],
+[
+"Fechar e mostrar para um adulto",
+"c"
+]
+]
+},
+"c": {
+"txt": "Sua mãe olha e diz: \"Isso é golpe. Chama-se phishing: imitam um site para roubar senhas.\" Vocês denunciam a mensagem e trocam a senha por uma mais forte, com frase longa.",
+"end": "otimo"
+},
+"d": {
+"txt": "No dia seguinte, sua conta está sem os itens e com outra senha. Com ajuda de um adulto, você recupera a conta pelo suporte do jogo e ativa a verificação em duas etapas. Deu trabalho, mas você aprendeu a não digitar senhas em links desconhecidos.",
+"end": "ruim"
+}
+},
+"w": 5
+},
+{
+"id": "chef",
+"t": "O bolo que não cresceu",
+"ico": "chef-hat",
+"sub": "Ciência na cozinha",
+"start": "a",
+"n": {
+"a": {
+"txt": "É aniversário da sua avó e você decide fazer um bolo sozinho, com supervisão do seu pai. A receita pede fermento químico, mas o pote está quase vazio.",
+"ch": [
+[
+"Usar o pouco que tem",
+"b"
+],
+[
+"Pesquisar um substituto",
+"c"
+]
+]
+},
+"b": {
+"txt": "O bolo sai do forno baixinho e pesado. Seu pai explica: o fermento libera gás carbônico, que forma bolhas e faz a massa crescer. Com pouco fermento, pouco gás.",
+"ch": [
+[
+"Tentar de novo com um substituto",
+"c"
+]
+]
+},
+"c": {
+"txt": "Vocês descobrem que bicarbonato de sódio com algo ácido, como iogurte ou suco de limão, também produz gás carbônico.",
+"ch": [
+[
+"Usar bicarbonato com iogurte",
+"d"
+],
+[
+"Usar bicarbonato sem nada ácido",
+"e"
+]
+]
+},
+"d": {
+"txt": "O bolo cresce fofinho! Sua avó adora e pede a receita. Você explica a reação química na mesa e todo mundo fica impressionado.",
+"end": "otimo"
+},
+"e": {
+"txt": "Sem o ácido, a reação quase não acontece e o bolo fica com gosto amargo. Você entende por que a receita precisava do iogurte e promete tentar de novo.",
+"end": "neutro"
+}
+},
+"w": 6
+},
+{
+"id": "eleicao",
+"t": "A eleição do grêmio",
+"ico": "users",
+"sub": "Cidadania",
+"start": "a",
+"n": {
+"a": {
+"txt": "Sua escola vai eleger o grêmio estudantil e você decide se candidatar. Seu rival promete \"recreio de uma hora todo dia\".",
+"ch": [
+[
+"Prometer algo ainda maior",
+"b"
+],
+[
+"Fazer uma pesquisa com os colegas",
+"c"
+]
+]
+},
+"b": {
+"txt": "Você promete \"sem provas para sempre\". Os colegas riem, mas a diretora explica que o grêmio não tem poder para isso. Sua credibilidade cai.",
+"ch": [
+[
+"Recomeçar ouvindo os colegas",
+"c"
+]
+]
+},
+"c": {
+"txt": "Você pergunta aos colegas o que mais incomoda. A resposta mais comum: o bebedouro quebrado e a falta de sombra na quadra.",
+"ch": [
+[
+"Propor consertar o bebedouro e plantar árvores",
+"d"
+]
+]
+},
+"d": {
+"txt": "Você apresenta propostas possíveis, com orçamento e prazos. Na votação, ganha por pouca diferença. Três meses depois, o bebedouro funciona e as mudas já foram plantadas. Promessa cumprida é a melhor campanha.",
+"end": "otimo"
+}
+},
+"w": 7
+},
+{
+"id": "vulcao",
+"t": "Ilha do vulcão adormecido",
+"ico": "flame",
+"sub": "Aventura e ciência",
+"start": "a",
+"n": {
+"a": {
+"txt": "Numa expedição com vulcanólogos numa ilha remota, os sensores mostram pequenos tremores no vulcão. A chefe da expedição precisa decidir o que fazer.",
+"ch": [
+[
+"Sugerir subir até a cratera para ver",
+"b"
+],
+[
+"Sugerir analisar os dados primeiro",
+"c"
+]
+]
+},
+"b": {
+"txt": "A chefe recusa: \"Gases tóxicos podem sair sem aviso. Primeiro, os dados.\"",
+"ch": [
+[
+"Analisar os dados",
+"c"
+]
+]
+},
+"c": {
+"txt": "Os tremores aumentam e o solo está se elevando alguns centímetros. Há uma vila de pescadores do outro lado da ilha.",
+"ch": [
+[
+"Avisar a vila para evacuar",
+"d"
+],
+[
+"Esperar mais dados para ter certeza",
+"e"
+]
+]
+},
+"d": {
+"txt": "A vila evacua de barco. Dois dias depois, o vulcão solta uma nuvem de cinzas. Ninguém se fere. Os moradores agradecem: a ciência ajudou a salvar vidas.",
+"end": "otimo"
+},
+"e": {
+"txt": "Enquanto vocês esperam, o vulcão começa a soltar cinzas. A evacuação acontece às pressas, assustando todo mundo, mas ninguém se fere. A lição: às vezes é melhor agir com cuidado do que esperar a certeza total.",
+"end": "neutro"
+}
+},
+"w": 8
+},
+{
+"id": "amazonia",
+"t": "O segredo do rio",
+"ico": "trees",
+"sub": "Amazônia",
+"start": "a",
+"n": {
+"a": {
+"txt": "Num barco pelo rio Negro, na Amazônia, você percebe que a água é escura como chá, mas mais à frente encontra outro rio, de água barrenta, e as duas não se misturam.",
+"ch": [
+[
+"Perguntar ao barqueiro",
+"b"
+],
+[
+"Coletar água dos dois lados",
+"c"
+]
+]
+},
+"b": {
+"txt": "Seu Raimundo, o barqueiro, sorri: \"É o Encontro das Águas. O rio Negro e o Solimões correm lado a lado por quilômetros.\"",
+"ch": [
+[
+"Perguntar por quê",
+"c"
+]
+]
+},
+"c": {
+"txt": "Uma pesquisadora no barco explica: os rios têm temperatura, velocidade e quantidade de sedimentos diferentes, por isso demoram a se misturar. Ela pede ajuda para medir a temperatura.",
+"ch": [
+[
+"Ajudar nas medições",
+"d"
+],
+[
+"Preferir ver os botos",
+"e"
+]
+]
+},
+"d": {
+"txt": "Você mede e anota: a água do Negro está mais quente. Seus dados entram no relatório da pesquisadora, e ela te dá o crédito como assistente de campo.",
+"end": "otimo"
+},
+"e": {
+"txt": "Você vê botos-cor-de-rosa brincando perto do barco. Um espetáculo! À noite, a pesquisadora te explica o que descobriu com as medições.",
+"end": "bom"
+}
+},
+"w": 9
+},
+{
+"id": "museu",
+"t": "Noite no museu de ciências",
+"ico": "building-museum",
+"sub": "Mistério e ciência",
+"start": "a",
+"n": {
+"a": {
+"txt": "Numa noite especial de acampamento no museu de ciências, a luz acaba às 22h. No escuro, você ouve um zumbido estranho vindo da sala dos dinossauros.",
+"ch": [
+[
+"Ir investigar com a lanterna",
+"b"
+],
+[
+"Chamar o monitor",
+"c"
+]
+]
+},
+"b": {
+"txt": "Na sala, o zumbido vem de uma caixa atrás do esqueleto do T-rex. Há fios e uma luz vermelha piscando.",
+"ch": [
+[
+"Puxar os fios",
+"d"
+],
+[
+"Chamar o monitor",
+"c"
+]
+]
+},
+"c": {
+"txt": "O monitor examina e ri: é o gerador de emergência, que liga quando a energia cai. Ele explica como baterias e geradores mantêm os equipamentos funcionando.",
+"ch": [
+[
+"Ajudar a religar as luzes",
+"e"
+]
+]
+},
+"d": {
+"txt": "Antes que você puxe, o monitor chega correndo: \"Não! É o gerador de emergência!\" Por pouco. Ele explica que nunca se mexe em fios sem saber o que são.",
+"ch": [
+[
+"Ajudar a religar as luzes",
+"e"
+]
+]
+},
+"e": {
+"txt": "Com o monitor, vocês acompanham o técnico religar o disjuntor. As luzes voltam e o grupo aplaude. Você ganha uma visita exclusiva aos bastidores do museu.",
+"end": "otimo"
+}
+},
+"w": 10
+},
+{
+"id": "marte",
+"t": "Primeira horta em Marte",
+"ico": "plant",
+"sub": "Ficção científica",
+"start": "a",
+"n": {
+"a": {
+"txt": "Você faz parte da primeira colônia em Marte e é responsável pela horta. As plantas estão murchando dentro da estufa.",
+"ch": [
+[
+"Aumentar a água",
+"b"
+],
+[
+"Verificar a luz e a temperatura",
+"c"
+]
+]
+},
+"b": {
+"txt": "Com mais água, as raízes começam a apodrecer. O problema não era sede.",
+"ch": [
+[
+"Verificar a luz e a temperatura",
+"c"
+]
+]
+},
+"c": {
+"txt": "Os sensores mostram: temperatura boa, mas pouca luz. Marte está mais longe do Sol que a Terra e recebe menos luz. Uma tempestade de poeira também escureceu o céu.",
+"ch": [
+[
+"Instalar lâmpadas de LED",
+"d"
+],
+[
+"Esperar a tempestade passar",
+"e"
+]
+]
+},
+"d": {
+"txt": "Com luzes de LED nas cores certas, as plantas voltam a crescer. Em semanas, a colônia come a primeira alface marciana. Você vira o agricultor espacial mais famoso do Sistema Solar.",
+"end": "otimo"
+},
+"e": {
+"txt": "A tempestade dura semanas e metade da horta não resiste. Com as sementes que sobraram, você instala lâmpadas e recomeça. Missão cumprida, com atraso.",
+"end": "neutro"
+}
+},
+"w": 11
+},
+{
+"id": "enchente",
+"t": "Chuva forte na cidade",
+"ico": "cloud-rain",
+"sub": "Segurança e comunidade",
+"start": "a",
+"n": {
+"a": {
+"txt": "Chove muito há dois dias. Voltando da escola, a rua perto de casa está alagada e a água corre rápido.",
+"ch": [
+[
+"Atravessar a água a pé",
+"b"
+],
+[
+"Procurar outro caminho mais alto",
+"c"
+]
+]
+},
+"b": {
+"txt": "A água bate no joelho e puxa com força. Um vizinho grita para você voltar: água de enchente pode esconder buracos e bueiros abertos. Você volta com cuidado.",
+"ch": [
+[
+"Procurar outro caminho mais alto",
+"c"
+]
+]
+},
+"c": {
+"txt": "Pelo caminho alto, você chega em casa. A defesa civil manda alerta no celular: risco de alagamento no bairro.",
+"ch": [
+[
+"Ajudar a família a erguer móveis e tomadas",
+"d"
+],
+[
+"Postar vídeos da enchente na rua",
+"e"
+]
+]
+},
+"d": {
+"txt": "Vocês levantam móveis, desligam a energia da parte baixa da casa e separam documentos. A água entra um pouco, mas nada importante se perde. Sua família te agradece pela calma.",
+"end": "otimo"
+},
+"e": {
+"txt": "Você filma da janela, em segurança, e envia o vídeo para a defesa civil, ajudando a mapear o alagamento. Depois, ajuda a família a se preparar.",
+"end": "bom"
+}
+},
+"w": 12
+},
+{
+"id": "olimpiada",
+"t": "A olimpíada de matemática",
+"ico": "math",
+"sub": "Desafio e raciocínio",
+"start": "a",
+"n": {
+"a": {
+"txt": "Na olimpíada de matemática, a última questão diz: \"Num torneio, cada um dos 6 times joga uma vez contra cada outro. Quantos jogos há?\" Faltam 5 minutos.",
+"ch": [
+[
+"Chutar uma resposta",
+"b"
+],
+[
+"Desenhar os times e contar",
+"c"
+]
+]
+},
+"b": {
+"txt": "Você chuta 36, porque 6 × 6. Mas sente que não está certo: um time não joga contra si mesmo.",
+"ch": [
+[
+"Desenhar e contar",
+"c"
+]
+]
+},
+"c": {
+"txt": "Você desenha 6 pontos e liga cada par com uma linha. O primeiro time joga 5 jogos, o segundo mais 4 novos, depois 3, 2 e 1.",
+"ch": [
+[
+"Somar 5 + 4 + 3 + 2 + 1",
+"d"
+]
+]
+},
+"d": {
+"txt": "Dá 15 jogos! Também dá para calcular 6 × 5 ÷ 2 = 15, porque cada jogo foi contado duas vezes. Você entrega a prova a tempo e ganha medalha de bronze. Desenhar o problema fez toda a diferença.",
+"end": "otimo"
+}
+},
+"w": 13
+},
+{
+"id": "cachorro",
+"t": "O cachorro perdido",
+"ico": "dog",
+"sub": "Responsabilidade",
+"start": "a",
+"n": {
+"a": {
+"txt": "Na praça, um cachorro com coleira e sem dono por perto te segue, abanando o rabo. Ele parece com fome e assustado.",
+"ch": [
+[
+"Levar para casa e ficar com ele",
+"b"
+],
+[
+"Procurar o dono",
+"c"
+]
+]
+},
+"b": {
+"txt": "Seus pais explicam que ele tem coleira, então alguém deve estar procurando. Ficar com ele sem procurar o dono não seria justo.",
+"ch": [
+[
+"Procurar o dono",
+"c"
+]
+]
+},
+"c": {
+"txt": "Na coleira há uma plaquinha com um nome, Pipoca, e um número de telefone apagado pela chuva. Dá para ler só alguns números.",
+"ch": [
+[
+"Levar a um veterinário para ver se tem microchip",
+"d"
+],
+[
+"Fazer cartazes no bairro",
+"e"
+]
+]
+},
+"d": {
+"txt": "O veterinário lê o microchip e encontra o dono, que chega emocionado. Pipoca tinha fugido por causa dos fogos. Você ganha um amigo para visitar.",
+"end": "otimo"
+},
+"e": {
+"txt": "Com os cartazes e uma postagem no grupo do bairro, em dois dias a dona aparece. Deu mais trabalho, mas a Pipoca voltou para casa.",
+"end": "bom"
+}
+},
+"w": 14
+},
+{
+"id": "inventor",
+"t": "Santos Dumont e o voo",
+"ico": "plane",
+"sub": "Ciência e história",
+"start": "a",
+"n": {
+"a": {
+"txt": "Numa viagem no tempo, você chega a Paris, em 1906. Um brasileiro, Alberto Santos Dumont, prepara um aparelho estranho chamado 14-bis para tentar voar diante de uma multidão.",
+"ch": [
+[
+"Oferecer ajuda",
+"b"
+],
+[
+"Ficar na plateia observando",
+"c"
+]
+]
+},
+"b": {
+"txt": "Santos Dumont aceita ajuda para checar o motor. Ele explica que o aparelho precisa decolar sozinho, usando a força do próprio motor, sem ser lançado por catapulta.",
+"ch": [
+[
+"Assistir à decolagem",
+"c"
+]
+]
+},
+"c": {
+"txt": "O 14-bis corre pelo campo e sobe no ar, voando cerca de 60 metros diante de testemunhas. A multidão comemora! Santos Dumont fica famoso no mundo todo.",
+"ch": [
+[
+"Perguntar o que ele vai fazer com a invenção",
+"d"
+]
+]
+},
+"d": {
+"txt": "Ele conta que não quer patentear algumas criações, porque prefere que todos possam aproveitar. Você volta ao presente orgulhoso de conhecer um inventor brasileiro tão importante.",
+"end": "otimo"
+}
+},
+"w": 15
+}
 ]

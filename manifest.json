@@ -1,6 +1,6 @@
 {
-  "name": "Casulo Play",
-  "short_name": "Casulo Play",
+  "name": "CasuloPlay",
+  "short_name": "CasuloPlay",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

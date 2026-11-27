@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Casulo Play</title>
+<title>CasuloPlay</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Casulo Play">
+<meta name="apple-mobile-web-app-title" content="CasuloPlay">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127133246">
+<meta name="mt-build" content="20261127133431">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -101,7 +101,7 @@ header h1{margin-right:auto;order:1}
 </head>
 <body>
 <header>
-  <h1 id="appName">Casulo <b>Play</b></h1>
+  <h1 id="appName">Casulo<b>Play</b></h1>
   <input id="q" type="search" placeholder="Pesquisar vídeos…" aria-label="Pesquisar">
   <button id="bPais" class="mini" aria-label="Filtro Pais"><i class="ti ti-lock"></i> Pais</button>
 </header>
@@ -148,7 +148,7 @@ header h1{margin-right:auto;order:1}
     <button id="payLogin">Entrar na conta da família</button>
   </div>
   <p class="hint" style="margin-top:12px">Já assinou? Entre com o mesmo e-mail usado na compra.</p>
-  <p style="margin-top:8px"><a href="sobre/" style="color:var(--acc);font-weight:700">Conheça o Casulo Play</a></p>
+  <p style="margin-top:8px"><a href="sobre/" style="color:var(--acc);font-weight:700">Conheça o CasuloPlay</a></p>
 </div></div>
 
 <div class="ov" id="pin"><div class="panel" style="max-width:380px;margin-top:10vh">
@@ -184,7 +184,7 @@ header h1{margin-right:auto;order:1}
     <p class="hint" id="acMsg"></p>
   </div>
   <label for="cApp">Nome do app nesta família (opcional)</label>
-  <input id="cApp" placeholder="Casulo Play" autocomplete="off" maxlength="24">
+  <input id="cApp" placeholder="CasuloPlay" autocomplete="off" maxlength="24">
   <p class="hint">Ex.: o nome que seu filho escolheu. Aparece no topo e no ícone da tela inicial (para o ícone, adicione o app de novo à tela inicial).</p>
   <label for="cName">Nome do seu filho</label>
   <input id="cName" placeholder="Nome ou apelido" autocomplete="off">
@@ -442,8 +442,8 @@ function lockIdeas(){
 }
 function showLock(){lockIdeas();$('lock').classList.add('show')}
 function appName(){
-  const n=(cfg.appName||'').trim()||'Casulo Play';const i=n.lastIndexOf(' ');
-  $('appName').innerHTML=i>0?esc(n.slice(0,i))+' <b>'+esc(n.slice(i+1))+'</b>':'<b>'+esc(n)+'</b>';
+  const n=(cfg.appName||'').trim()||'CasuloPlay';let i=n.lastIndexOf(' ');let sp=' ';if(i<0){const m=n.slice(1).search(/[A-Z][^A-Z]*$/);if(m>=0){i=m+1;sp=''}}
+  $('appName').innerHTML=i>0?esc(n.slice(0,i))+(sp?' ':'')+'<b>'+esc(n.slice(sp?i+1:i))+'</b>':'<b>'+esc(n)+'</b>';
   document.title=n;const m=document.querySelector('meta[name=apple-mobile-web-app-title]');if(m)m.content=n;
 }
 function hello(){appName();
@@ -543,7 +543,7 @@ function payCheck(){
   if(ok){$('pay').classList.remove('show');return}
   $('payBuy').href=CHECKOUT_URL||'#';
   $('payLogin').style.display=u?'none':'';
-  $('payT').textContent=!u?'Bem-vindo ao Casulo Play':subInfo.data&&subInfo.data.status==='atrasada'?'Pagamento pendente':'Assinatura necessária';
+  $('payT').textContent=!u?'Bem-vindo ao CasuloPlay':subInfo.data&&subInfo.data.status==='atrasada'?'Pagamento pendente':'Assinatura necessária';
   $('payTxt').textContent=!u?'Assine para liberar o app ou entre na conta da família se você já assinou.':subInfo.data&&subInfo.data.status==='atrasada'?'Há um pagamento em aberto. Regularize na Kiwify para continuar usando.':'Não encontramos uma assinatura ativa para '+(u.email||'esta conta')+'.';
   $('pay').classList.add('show');
 }

@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="Casulo Play">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127124646">
+<meta name="mt-build" content="20261127125533">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -526,7 +526,7 @@ $('cAvaRm').onclick=()=>{try{localStorage.removeItem('mt_avatar')}catch(e){}$('c
 function cloudData(){let av='';try{av=localStorage.getItem('mt_avatar')||''}catch(e){}return {cfg,avatar:av,updatedAt:Date.now()}}
 function cloudPush(){if(window.fb&&fb.user){const d=cloudData();save('mt_cfg_ts',d.updatedAt);fb.push(d).then(()=>acStatus('Configurações salvas na nuvem.')).catch(e=>acStatus('Não consegui salvar na nuvem: '+fb.err(e)))}}
 function acStatus(t){$('acSync').textContent=t}
-const PAYWALL=true, CHECKOUT_URL='https://pay.kiwify.com.br/2a5tN80', ADMINS=['daaguiar@gmail.com'];
+const PAYWALL=true, CHECKOUT_URL='https://pay.kiwify.com.br/NKplJIf', ADMINS=['daaguiar@gmail.com'];
 let subInfo={loaded:false,data:null,user:null};
 function payCheck(){
   if(!PAYWALL||!SERVER){$('pay').classList.remove('show');return}

@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="CasuloPlay">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127170221">
+<meta name="mt-build" content="20261127180230">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -846,23 +846,20 @@ const recAge={
  'Até 6 anos':{
   'Música e diversão':['Mundo Bita','Palavra Cantada','Galinha Pintadinha','Patati Patatá'],
   'Desenhos':['Turma da Mônica','Bluey Português Brasil','Peppa Pig Português Brasil','Vila Sésamo'],
-  'Aprender brincando':['SciShow Kids','Art for Kids Hub']
+  'Aprender brincando':['Manual do Mundo','Ciência Todo Dia']
  },
  '7 a 9 anos':{
-  'Ciência':['Manual do Mundo','SciShow Kids','Ciência Todo Dia'],
+  'Ciência':['Manual do Mundo','Ciência Todo Dia','Space Today'],
   'Desenhos':['Turma da Mônica','Cartoon Network Brasil'],
-  'Arte e desenho':['Art for Kids Hub'],
   'Games':['AuthenticGames','Julia MineGirl'],
   'Educação':['Khan Academy Brasil'],
   'Natureza e animais':['National Geographic Brasil']
  },
  '10 a 12 anos':{
-  'Ciência':['Manual do Mundo','Ciência Todo Dia','Mark Rober','Space Today','Brincando com Ideias'],
+  'Ciência':['Manual do Mundo','Ciência Todo Dia','Space Today','Brincando com Ideias'],
   'Educação':['Khan Academy Brasil','Se Liga Nessa História','Gis com Giz','Mairo Vergara'],
   'Games':['AuthenticGames','Athos','Robin Hood Gamer','Julia MineGirl'],
-  'Esportes':['Dude Perfect'],
-  'Arte e desenho':['Art for Kids Hub'],
-  'Natureza e animais':['National Geographic Brasil','BBC Earth'],
+  'Natureza e animais':['National Geographic Brasil'],
   'Música':['Cifra Club'],
   'Culinária':['Tastemade Brasil'],
   'Desenhos e animação':['Turma da Mônica','Cartoon Network Brasil']
@@ -909,8 +906,13 @@ async function findCh(){
     const c=await yt('channels',{part:'snippet,statistics,status',id:ids.slice().sort().join(',')});
     const have=$('cCats').value.toLowerCase();
     const kid=ch=>!!(ch.status&&ch.status.madeForKids);
+    const ptWords=/\b(de|do|da|para|com|voc[eê]|v[ií]deos?|canal|n[aã]o|mais|como|seu|sua|aqui|toda|semana|inscreva|crian[cç]as?)\b/i;
+    const isPt=ch=>{const sn=ch.snippet||{};const lang=(sn.defaultLanguage||'').toLowerCase();
+      if(lang)return lang.startsWith('pt');if(sn.country)return sn.country==='BR'||sn.country==='PT';
+      const tx=(sn.title||'')+' '+(sn.description||'');return /[ãõçáéíóúâêô]/i.test(tx)||((tx.match(new RegExp(ptWords.source,'gi'))||[]).length>=3)};
+    c.items=c.items.filter(isPt);
     const list=c.items.sort((a,b)=>(kid(b)-kid(a))||((+b.statistics.subscriberCount||0)-(+a.statistics.subscriberCount||0)));
-    $('fMsg').textContent=list.length+' canais. Confira antes de adicionar.';
+    $('fMsg').textContent=list.length?list.length+' canais em português. Confira antes de adicionar.':'Nenhum canal em português encontrado. Tente outras palavras.';
     $('fRes').innerHTML=list.map(ch=>{const h=ch.snippet.customUrl||ch.id;const done=have.includes(h.toLowerCase());
       return `<div class="ch"><img loading="lazy" src="${esc((ch.snippet.thumbnails.default||{}).url)}" alt=""><div><strong>${esc(ch.snippet.title)}</strong>${kid(ch)?'<span style="display:inline-block;background:#2f6f4f;color:#fff;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;margin:2px 0">Feito para crianças</span>':''}<small>${fmt(ch.statistics.subscriberCount)} inscritos · ${esc(ch.snippet.description)}</small><a href="https://www.youtube.com/channel/${esc(ch.id)}" target="_blank" rel="noopener" style="color:var(--acc);font-size:14px">Ver canal</a></div><button data-h="${esc(h)}" class="${done?'added':''}">${done?'Adicionado':'Adicionar'}</button></div>`}).join('');
   }catch(e){$('fMsg').textContent='Erro: '+e.message}

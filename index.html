@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="CasuloPlay">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127164349">
+<meta name="mt-build" content="20261127164904">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -456,7 +456,11 @@ const MISSIONS=[
      ['Em programação, o que é um “bug”?',['Um inseto no teclado','Um erro no programa','Um vírus de celular'],1]],
   d:'Escreva o “algoritmo” para fazer um sanduíche, passo a passo. Peça para alguém seguir exatamente o que você escreveu, ao pé da letra. Funcionou?'}
 ];
+let STORIES=[],storyDone=load('mt_stories',{}),stNow=null;
+fetch('stories.json').then(r=>r.json()).then(j=>{STORIES=j}).catch(()=>{});
+const endsFound=()=>Object.values(storyDone).reduce((a,x)=>a+(x.ends||[]).length,0);
 const MEDALS=[
+ ['historias','book','Contador de histórias','Descubra 5 finais de histórias',()=>endsFound(),5],
  ['missoes','target-arrow','Missionário','Complete 5 missões',()=>Object.keys(missDone).length,5],
  ['primeiro','flag','Primeiro passo','Termine 1 vídeo',d=>d.length,1],
  ['cientista','flask','Cientista curioso','Termine 5 vídeos de ciência',d=>d.filter(x=>/cienc/.test(norm(x.k))).length,5],
@@ -566,7 +570,7 @@ function missionsView(){
   $('grid').className='';const n=Object.keys(missDone).length;
   const av=MISSIONS.filter(m=>missVideo(m)),lock=MISSIONS.filter(m=>!missVideo(m));
   $('grid').innerHTML=`<div style="grid-column:1/-1"><div class="sec"><h3>Missões</h3><small class="hint">${n} concluídas</small></div>
-  <div class="ms"><button id="qzOpen" style="outline:2px solid var(--acc)"><i class="ti ti-bolt"></i><span><b>Quiz relâmpago</b><small>10 perguntas em 60 segundos</small></span></button></div>
+  <div class="ms"><button id="qzOpen" style="outline:2px solid var(--acc)"><i class="ti ti-bolt"></i><span><b>Quiz relâmpago</b><small>10 perguntas em 60 segundos</small></span></button><button id="stOpen" style="outline:2px solid var(--acc)"><i class="ti ti-book"></i><span><b>Histórias de escolha</b><small>Você decide o final</small></span></button></div>
   ${av.length?`<p class="hint" style="padding:0 max(4vw,14px);margin:0 0 12px">Assista, conte o que aprendeu e faça o desafio. Ganhe medalhas, pontos e minutos bônus.</p>
   <div class="ms">${av.map(m=>`<button data-mi="${m.id}" class="${missDone[m.id]?'ok':''}"><i class="ti ti-${m.ico}"></i><span><b>${esc(m.t)}</b><small>${missDone[m.id]?'Concluída':esc(m.sub)}</small></span></button>`).join('')}</div>`
   :`<p class="hint" style="padding:0 max(4vw,14px)">Nenhuma missão liberada ainda. As missões aparecem quando há vídeos sobre o tema nos canais de aprendizado aprovados.</p>`}
@@ -599,6 +603,30 @@ function missionDone(id){
   let msg='Missão concluída!';
   if(lim()&&(used.b||0)<30){usedNow();used.b=(used.b||0)+5;save('mt_used',used);msg+=' +5 min de bônus!';showLeft()}
   toast(msg,'target-arrow');checkMedals();missionsView();
+}
+function storiesView(){
+  $('grid').className='';
+  $('grid').innerHTML=`<div style="grid-column:1/-1"><div class="mi"><button id="miBack" style="margin:14px 0 4px;background:none;padding:0;color:var(--mut)"><i class="ti ti-arrow-left"></i> Missões</button>
+  <h2 style="margin:4px 0 6px;font-size:28px"><i class="ti ti-book" style="color:var(--acc)"></i> Histórias de escolha</h2><p class="hint">Você decide o caminho. Cada história tem vários finais: tente descobrir todos!</p></div>
+  <div class="ms">${STORIES.map(st=>{const tot=Object.values(st.n).filter(x=>x.end).length,f=(storyDone[st.id]&&storyDone[st.id].ends||[]).length;
+   return `<button data-st="${st.id}"><i class="ti ti-${st.ico}"></i><span><b>${esc(st.t)}</b><small>${esc(st.sub)} · ${f}/${tot} finais</small></span></button>`}).join('')||'<p class="hint">Carregando…</p>'}</div></div>`;
+}
+function storyNode(id,k){
+  const st=STORIES.find(x=>x.id===id);const nd=st.n[k];stNow={id,k};
+  let endHtml='';
+  if(nd.end){const r=storyDone[id]||(storyDone[id]={ends:[]});const nova=!r.ends.includes(k);
+    if(nova){r.ends.push(k);save('mt_stories',storyDone);addXp(15);checkMedals()}
+    const lab={otimo:'Final incrível!',bom:'Final feliz!',neutro:'Final… mais ou menos.',ruim:'Ufa, terminou bem, mas dava para ir melhor.'}[nd.end]||'Fim!';
+    const tot=Object.values(st.n).filter(x=>x.end).length;
+    endHtml=`<div class="qz" style="text-align:center"><p style="font-size:20px">${lab}</p><small class="hint">${nova?'Novo final descoberto! +15 pontos. ':''}Você já encontrou ${r.ends.length} de ${tot} finais.</small></div>
+     <div class="row"><button class="pri" data-stgo="${st.start}">Jogar de novo</button><button id="stList">Outras histórias</button></div>`}
+  $('grid').className='';
+  $('grid').innerHTML=`<div style="grid-column:1/-1" class="mi"><button id="stList" style="margin:14px 0 4px;background:none;padding:0;color:var(--mut)"><i class="ti ti-arrow-left"></i> Histórias</button>
+   <h2 style="margin:4px 0 12px;font-size:24px">${esc(st.t)}</h2>
+   <p style="font-size:19px;line-height:1.65;margin:0 0 18px">${esc(nd.txt)}</p>
+   ${(nd.ch||[]).map(([l,nx])=>`<button data-stgo="${nx}" style="display:block;width:100%;text-align:left;margin-bottom:10px;background:var(--card);border:2px solid #33496b;padding:12px 16px;font-size:17px"><i class="ti ti-arrow-right" style="color:var(--acc)"></i> ${esc(l)}</button>`).join('')}
+   ${endHtml}</div>`;
+  scrollTo(0,0);
 }
 const QZ=[...MISSIONS.flatMap(m=>m.q),
  ['Qual é o maior oceano da Terra?',['Atlântico','Pacífico','Índico'],1],
@@ -740,6 +768,9 @@ if(SERVER)$('cKeyH').textContent='Opcional. Deixe em branco para usar o servidor
 $('grid').addEventListener('click',e=>{const b=e.target.closest('[data-mi]');if(b){missionView(b.dataset.mi);scrollTo(0,0);return}
   if(e.target.closest('#miBack')){qzS=null;clearInterval(qzT);missionsView();scrollTo(0,0);return}
   if(e.target.closest('#qzOpen')){quizView();scrollTo(0,0);return}
+  if(e.target.closest('#stOpen')||e.target.closest('#stList')){storiesView();scrollTo(0,0);return}
+  const sb=e.target.closest('[data-st]');if(sb){const st=STORIES.find(x=>x.id===sb.dataset.st);if(st)storyNode(st.id,st.start);return}
+  const sg=e.target.closest('[data-stgo]');if(sg&&stNow){storyNode(stNow.id,sg.dataset.stgo);return}
   if(e.target.closest('#qzGo')){quizStart();return}
   const qa=e.target.closest('[data-qa]');if(qa&&qzS){quizAns(+qa.dataset.qa,qa);return}
   const o=e.target.closest('#miOk');if(o)missionDone(o.dataset.id)});

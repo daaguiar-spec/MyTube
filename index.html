@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="SixSeven Tube">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261126215823">
+<meta name="mt-build" content="20261127081711">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -173,7 +173,7 @@ header h1{margin-right:auto;order:1}
   <p class="hint">A foto fica salva só neste aparelho. Ela não vai para a internet.</p>
   <label for="cKey">Chave da API do YouTube</label>
   <input id="cKey" placeholder="AIza…">
-  <p class="hint">Gratuita, criada no Google Cloud (YouTube Data API v3).</p>
+  <p class="hint" id="cKeyH">Gratuita, criada no Google Cloud (YouTube Data API v3).</p>
   <label for="cCats">Categorias e canais aprovados</label>
   <div id="cAppr"></div>
   <textarea id="cCats"></textarea>
@@ -235,7 +235,7 @@ const iso=d=>{const m=String(d||'').match(/P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(
 async function addDur(list){
   const need=list.filter(v=>v.dur==null).map(v=>v.id);
   for(let i=0;i<need.length;i+=50){
-    try{const j=await yt('videos',{part:'contentDetails',id:need.slice(i,i+50).join(',')});
+    try{const j=await yt('videos',{part:'contentDetails',id:need.slice(i,i+50).sort().join(',')});
       const mp={};j.items.forEach(x=>mp[x.id]=iso(x.contentDetails.duration));
       list.forEach(v=>{if(mp[v.id]!=null)v.dur=mp[v.id]});}catch(e){}
   }
@@ -255,9 +255,17 @@ function ok(v){
   return !cfg.words.split(',').map(w=>norm(w.trim())).filter(Boolean).some(w=>
     /^[a-z0-9]+$/.test(w)?new RegExp('\\b'+w+'\\b').test(t):t.includes(w));
 }
+const SERVER=!/github\.io$/.test(location.hostname)&&location.protocol==='https:';
+const useServer=()=>SERVER&&!cfg.key;
 async function yt(path,p){
-  p.key=cfg.key;
-  const r=await fetch(API+path+'?'+new URLSearchParams(p));const j=await r.json();
+  let r;
+  if(useServer()){
+    const q=new URLSearchParams(Object.entries({...p,path}).sort((a,b)=>a[0].localeCompare(b[0])));
+    r=await fetch('/api/yt?'+q);
+  }else{
+    p.key=cfg.key;r=await fetch(API+path+'?'+new URLSearchParams(p));
+  }
+  const j=await r.json();
   if(j.error)throw new Error(j.error.message);return j;
 }
 async function resolve(inp){
@@ -311,7 +319,7 @@ function tabs(){
 async function openCat(i,force){
   cur=i;tabs();msg('');$('q').value='';
   const c=cats()[i];
-  if(!cfg.key){show([],'Peça para um responsável configurar o app em “Filtro Pais”.');return}
+  if(!cfg.key&&!SERVER){show([],'Peça para um responsável configurar o app em “Filtro Pais”.');return}
   if(i===-2){show(favs,'Nenhum favorito ainda. Toque em ☆ Favoritar num vídeo.');return}
   if(i===-5){medalsView();return}
   if(i===-3){const seen=new Set();show(hist.filter(h=>!seen.has(h.id)&&seen.add(h.id)).map(h=>allVids().get(h.id)||{id:h.id,title:h.t,ch:h.c}),'Nada assistido ainda.');return}
@@ -519,6 +527,7 @@ $('acOutBtn').onclick=()=>window.fb&&fb.out();
 $('grid').addEventListener('click',e=>{const c=e.target.closest('#swC button');if(c){theme.acc=c.dataset.c;save('mt_theme',theme);applyTheme();medalsView();return}
   const m=e.target.closest('#swM button');if(m){theme.mas=m.dataset.m;save('mt_theme',theme);applyTheme();medalsView();toast('Oi! Agora eu sou seu mascote!')}});
 applyTheme();checkMedals();
+if(SERVER)$('cKeyH').textContent='Opcional. Deixe em branco para usar o servidor do app.';
 $('bPais').onclick=askPin;$('lockP').onclick=askPin;
 $('cHistClr').onclick=()=>{hist=[];save('mt_hist',hist);renderHist()};
 $('pinX').onclick=()=>$('pin').classList.remove('show');
@@ -615,14 +624,14 @@ function refreshCats(){renderAppr();$('fCats').innerHTML=catNames().map(n=>`<opt
 $('cCats').addEventListener('input',refreshCats);
 const fmt=n=>{n=+n;return n>=1e6?(n/1e6).toFixed(1).replace('.0','')+' mi':n>=1e3?Math.round(n/1e3)+' mil':String(n||0)};
 async function findCh(){
-  let q=$('fQ').value.trim();if(!q)return;
-  const key=$('cKey').value.trim();if(!key){$('fMsg').textContent='Cole a chave da API primeiro.';return}
+  let q=$('fQ').value.trim().replace(/\s+/g,' ').toLowerCase();if(!q)return;
+  const key=$('cKey').value.trim();if(!key&&!SERVER){$('fMsg').textContent='Cole a chave da API primeiro.';return}
   cfg.key=key;$('fMsg').textContent='Buscando…';$('fRes').innerHTML='';
   try{
     const s=await yt('search',{part:'snippet',q,type:'channel',safeSearch:'strict',maxResults:15,regionCode:'BR',relevanceLanguage:'pt'});
     const ids=s.items.map(i=>i.snippet.channelId||i.id.channelId).filter(Boolean);
     if(!ids.length){$('fMsg').textContent='Nenhum canal encontrado.';return}
-    const c=await yt('channels',{part:'snippet,statistics,status',id:ids.join(',')});
+    const c=await yt('channels',{part:'snippet,statistics,status',id:ids.slice().sort().join(',')});
     const have=$('cCats').value.toLowerCase();
     const kid=ch=>!!(ch.status&&ch.status.madeForKids);
     const list=c.items.sort((a,b)=>(kid(b)-kid(a))||((+b.statistics.subscriberCount||0)-(+a.statistics.subscriberCount||0)));

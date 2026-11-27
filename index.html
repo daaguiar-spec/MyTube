@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="Casulo Play">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127123204">
+<meta name="mt-build" content="20261127124123">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -101,7 +101,7 @@ header h1{margin-right:auto;order:1}
 </head>
 <body>
 <header>
-  <h1>Casulo <b>Play</b></h1>
+  <h1 id="appName">Casulo <b>Play</b></h1>
   <input id="q" type="search" placeholder="Pesquisar vídeos…" aria-label="Pesquisar">
   <button id="bPais" class="mini" aria-label="Filtro Pais"><i class="ti ti-lock"></i> Pais</button>
 </header>
@@ -177,6 +177,9 @@ header h1{margin-right:auto;order:1}
     </div>
     <p class="hint" id="acMsg"></p>
   </div>
+  <label for="cApp">Nome do app nesta família (opcional)</label>
+  <input id="cApp" placeholder="Casulo Play" autocomplete="off" maxlength="24">
+  <p class="hint">Ex.: o nome que seu filho escolheu. Aparece no topo e no ícone da tela inicial (para o ícone, adicione o app de novo à tela inicial).</p>
   <label for="cName">Nome do seu filho</label>
   <input id="cName" placeholder="Nome ou apelido" autocomplete="off">
   <label for="cAva">Foto do perfil</label>
@@ -432,7 +435,12 @@ function lockIdeas(){
   const n=(cfg.kidName||'').trim();$('lockT').textContent=(n?n+', o':'O')+' tempo de hoje acabou!';
 }
 function showLock(){lockIdeas();$('lock').classList.add('show')}
-function hello(){
+function appName(){
+  const n=(cfg.appName||'').trim()||'Casulo Play';const i=n.lastIndexOf(' ');
+  $('appName').innerHTML=i>0?esc(n.slice(0,i))+' <b>'+esc(n.slice(i+1))+'</b>':'<b>'+esc(n)+'</b>';
+  document.title=n;const m=document.querySelector('meta[name=apple-mobile-web-app-title]');if(m)m.content=n;
+}
+function hello(){appName();
   const n=(cfg.kidName||'').trim();let av='';try{av=localStorage.getItem('mt_avatar')||''}catch(e){}
   const on=(n||av)&&cur>=-1;$('hello').style.display=on?'flex':'none';if(!on)return;
   $('helloImg').style.display=av?'':'none';if(av)$('helloImg').src=av;$('helloIco').style.display=av?'none':'flex';
@@ -485,7 +493,7 @@ function renderHist(){
 }
 function openCfg(){
   $('cMin').value=String(minD());$('cMax').value=String(maxD());$('cLim').value=String(lim());renderHist();
-  $('cKey').value=cfg.key;$('cCats').value=cfg.cats;$('cWords').value=cfg.words;$('cBch').value=cfg.bch;$('cOpen').checked=cfg.open;$('cPin').value='';$('cName').value=cfg.kidName||'';$('cAva').value='';try{$('cAvaPrev').src=localStorage.getItem('mt_avatar')||''}catch(e){}
+  $('cKey').value=cfg.key;$('cCats').value=cfg.cats;$('cWords').value=cfg.words;$('cBch').value=cfg.bch;$('cOpen').checked=cfg.open;$('cPin').value='';$('cName').value=cfg.kidName||'';$('cApp').value=cfg.appName||'';$('cAva').value='';try{$('cAvaPrev').src=localStorage.getItem('mt_avatar')||''}catch(e){}
   $('cfg').classList.add('show');refreshCats();
 }
 const validPin=p=>/^\d{4,8}$/.test(p);
@@ -576,7 +584,7 @@ $('pinOk').onclick=()=>{
 $('pinIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinOk').click()});$('pinIn2').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinOk').click()});
 $('cX').onclick=()=>{$('cfg').classList.remove('show');parent=false;payCheck()};
 $('cSave').onclick=()=>{
-  cfg={key:$('cKey').value.trim(),cats:$('cCats').value,words:$('cWords').value,bch:$('cBch').value.trim(),open:$('cOpen').checked,pin:(validPin($('cPin').value.trim())?$('cPin').value.trim():cfg.pin),minDur:+$('cMin').value,maxDur:+$('cMax').value,limit:+$('cLim').value,kidName:$('cName').value.trim()};
+  cfg={key:$('cKey').value.trim(),cats:$('cCats').value,words:$('cWords').value,bch:$('cBch').value.trim(),open:$('cOpen').checked,pin:(validPin($('cPin').value.trim())?$('cPin').value.trim():cfg.pin),minDur:+$('cMin').value,maxDur:+$('cMax').value,limit:+$('cLim').value,kidName:$('cName').value.trim(),appName:$('cApp').value.trim()};
   save('mt_cfg',cfg);if(!timeUp())$('lock').classList.remove('show');
   cloudPush();
   $('cfg').classList.remove('show');parent=false;openCat(-1,true);payCheck();
@@ -593,7 +601,7 @@ $('cImp').onclick=()=>{
     t=t.replace(/-/g,'+').replace(/_/g,'/').replace(/[^A-Za-z0-9+\/]/g,'');while(t.length%4)t+='=';
     const bin=atob(t);const c=JSON.parse(new TextDecoder().decode(Uint8Array.from(bin,ch=>ch.charCodeAt(0))));
     if(typeof c.cats!=='string')throw 0;
-    cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,pin:validPin(c.pin||'')?c.pin:cfg.pin,minDur:c.minDur??181,maxDur:c.maxDur??0,limit:c.limit??0,kidName:c.kidName||cfg.kidName||''};
+    cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,pin:validPin(c.pin||'')?c.pin:cfg.pin,minDur:c.minDur??181,maxDur:c.maxDur??0,limit:c.limit??0,kidName:c.kidName||cfg.kidName||'',appName:c.appName||cfg.appName||''};
     save('mt_cfg',cfg);feed={};save('mt_feed2',feed);
     $('cMsg').textContent='Configuração aplicada!';
     openCfg();openCat(-1,true);

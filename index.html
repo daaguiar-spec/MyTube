@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="CasuloPlay">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127162910">
+<meta name="mt-build" content="20261127163345">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -427,27 +427,27 @@ let toastT;function toast(t,ico){$('toast').innerHTML=`<i class="ti ti-${ico||th
 let done=load('mt_done',[]);
 let missDone=load('mt_missions',{});
 const MISSIONS=[
- {id:'vulcoes',ico:'flame',t:'Vulcões',sub:'A Terra por dentro',kw:/vulc|lava|magma|erup/,
+ {id:'vulcoes',ico:'flame',t:'Vulcões',sub:'A Terra por dentro',kw:/\b(vulca|vulco|lava\b|magma|erupc)/,
   q:[['Como se chama o magma quando chega à superfície?',['Lava','Rocha','Cinza'],0],
      ['Qual é o maior vulcão conhecido do Sistema Solar?',['Monte Fuji','Monte Olimpo, em Marte','Vesúvio'],1],
      ['O Brasil tem vulcões ativos hoje?',['Sim, vários','Não','Só no Nordeste'],1]],
   d:'Com um adulto, monte um vulcão: num copo, coloque 2 colheres de bicarbonato e um pouco de detergente. Despeje vinagre (com corante, se tiver) e veja a “erupção”.'},
- {id:'espaco',ico:'planet',t:'Espaço',sub:'Planetas e estrelas',kw:/espa[cç]o|planeta|lua|estrela|gal[aá]xia|astron|nasa|foguete/,
+ {id:'espaco',ico:'planet',t:'Espaço',sub:'Planetas e estrelas',kw:/\b(espaco|planeta|sistema solar|lua\b|estrela|galaxia|astronom|nasa\b|foguete|buraco negro)/,
   q:[['Qual é o maior planeta do Sistema Solar?',['Saturno','Júpiter','Terra'],1],
      ['Quanto tempo a luz do Sol leva para chegar à Terra?',['Cerca de 8 minutos','1 segundo','1 dia'],0],
      ['Qual é a estrela mais próxima da Terra?',['Estrela Polar','Alfa Centauri','O Sol'],2]],
   d:'Observe a Lua por 3 noites seguidas e desenhe a forma dela em cada noite. Ela mudou?'},
- {id:'corpo',ico:'heartbeat',t:'Corpo humano',sub:'A máquina incrível',kw:/corpo|cora[cç][aã]o|c[eé]rebro|osso|m[uú]sculo|sangue/,
+ {id:'corpo',ico:'heartbeat',t:'Corpo humano',sub:'A máquina incrível',kw:/\b(corpo humano|coracao|cerebro|ossos?\b|musculo|sangue|esqueleto|orgaos?\b)/,
   q:[['Quantos ossos tem o corpo de um adulto?',['106','206','306'],1],
      ['Qual órgão bombeia o sangue pelo corpo?',['Pulmão','Fígado','Coração'],2],
      ['Qual é o maior órgão do corpo humano?',['A pele','O cérebro','O estômago'],0]],
   d:'Conte seus batimentos por 15 segundos (dois dedos no pulso) e multiplique por 4. Depois pule por 1 minuto e conte de novo. O que mudou?'},
- {id:'dinos',ico:'bone',t:'Dinossauros',sub:'Gigantes do passado',kw:/dinoss|f[oó]ssil|jur[aá]ss|t-?rex/,
+ {id:'dinos',ico:'bone',t:'Dinossauros',sub:'Gigantes do passado',kw:/\b(dinoss|fossil|fosseis|jurass|t-?rex)/,
   q:[['Em que era geológica viveram os dinossauros?',['Mesozoica','Cenozoica','Paleolítica'],0],
      ['As aves de hoje descendem dos dinossauros?',['Sim','Não','Só os pinguins'],0],
      ['Como os cientistas estudam os dinossauros?',['Por fotos antigas','Pelos fósseis','Por vídeos'],1]],
   d:'Faça uma linha do tempo numa folha comprida: marque quando viveram os dinossauros, quando eles sumiram e quando surgiram os humanos.'},
- {id:'codigo',ico:'code',t:'Programação',sub:'Pense como um programador',kw:/program|c[oó]digo|algoritmo|rob[oô]|computador|python|scratch/,
+ {id:'codigo',ico:'code',t:'Programação',sub:'Pense como um programador',kw:/\b(programa[cç]|programar|codigo|algoritmo|robotica|computador|python|scratch)/,
   q:[['O que é um algoritmo?',['Um tipo de computador','Uma sequência de passos para resolver um problema','Um jogo'],1],
      ['O sistema binário usa quais dígitos?',['0 e 1','1 e 2','0 a 9'],0],
      ['Em programação, o que é um “bug”?',['Um inseto no teclado','Um erro no programa','Um vírus de celular'],1]],
@@ -542,7 +542,9 @@ setInterval(()=>{
   if(lim()&&!used.w&&capS()-usedNow()<=300&&capS()-usedNow()>0){used.w=1;save('mt_used',used);toast('Faltam 5 minutos! Escolha bem o último vídeo.')}
   if(timeUp()){save('mt_used',used);closePlayer();showLock()}
 },1000);
-function missVideo(m){const seen=new Set();return [...allVids().values()].find(v=>ok(v)&&m.kw.test(norm(v.title+' '+(v.desc||''))))}
+function missVideo(m){
+  const learn=new Set();cats().forEach(c=>{if(isLearnName(c.name)&&feed[c.name])feed[c.name].v.forEach(v=>learn.add(v.id))});
+  return [...allVids().values()].find(v=>learn.has(v.id)&&ok(v)&&m.kw.test(norm(v.title)))}
 function missionsView(){
   $('grid').className='';const n=Object.keys(missDone).length;
   $('grid').innerHTML=`<div style="grid-column:1/-1"><div class="sec"><h3>Missões</h3><small class="hint">${n} de ${MISSIONS.length} concluídas</small></div>
@@ -555,8 +557,8 @@ function missionView(id){
   $('grid').innerHTML=`<div style="grid-column:1/-1" class="mi">
    <button id="miBack" style="margin:14px 0 4px;background:none;padding:0;color:var(--mut)"><i class="ti ti-arrow-left"></i> Missões</button>
    <h2 style="margin:4px 0 4px;font-size:28px"><i class="ti ti-${m.ico}" style="color:var(--acc)"></i> ${esc(m.t)}</h2>
-   <h4>1. Assista</h4>${v?`<div style="max-width:360px">${card(v)}</div>`:'<p class="hint">Nenhum vídeo sobre este tema nos canais aprovados ainda. Peça para um responsável aprovar um canal sobre '+esc(m.t.toLowerCase())+'. Você pode fazer o resto da missão mesmo assim.</p>'}
-   <h4>2. Responda</h4>${m.q.map((q,qi)=>`<div class="qz" data-q="${qi}"><p>${esc(q[0])}</p>${q[1].map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}">${esc(o)}</label>`).join('')}</div>`).join('')}
+   <h4>1. Assista um vídeo sobre o tema</h4>${v?`<div style="max-width:360px">${card(v)}</div>`:'<p class="hint">Ainda não há um vídeo sobre este tema nos canais de aprendizado aprovados. Peça para um responsável aprovar um canal sobre '+esc(m.t.toLowerCase())+'. Você pode fazer o resto da missão mesmo assim.</p>'}
+   <h4>2. Responda sobre o tema</h4><p class="hint" style="margin-top:-4px">As perguntas são sobre o assunto em geral. Nem sempre a resposta está no vídeo: use o que você já sabe ou pesquise.</p>${m.q.map((q,qi)=>`<div class="qz" data-q="${qi}"><p>${esc(q[0])}</p>${q[1].map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}">${esc(o)}</label>`).join('')}</div>`).join('')}
    <h4>3. Desafio em casa</h4><div class="dc"><p style="margin:0 0 10px">${esc(m.d)}</p><label class="chk" style="margin:0"><input type="checkbox" id="miDone"> Fiz o desafio!</label></div>
    <p class="hint" id="miMsg"></p>
    <div class="row"><button class="pri" id="miOk" data-id="${m.id}">${missDone[m.id]?'Missão já concluída':'Concluir missão'}</button></div></div>`;
@@ -567,7 +569,7 @@ function missionDone(id){
     box.querySelectorAll('label').forEach(l=>l.classList.remove('right','wrong'));
     if(!sel){all=false;return}const ok2=+sel.value===q[2];if(ok2)right++;sel.closest('label').classList.add(ok2?'right':'wrong')});
   if(!all){$('miMsg').textContent='Responda as 3 perguntas.';return}
-  if(right<2){$('miMsg').textContent='Você acertou '+right+' de 3. Assista ao vídeo de novo e tente outra vez!';return}
+  if(right<2){$('miMsg').textContent='Você acertou '+right+' de 3. Tente de novo!';return}
   if(!$('miDone').checked){$('miMsg').textContent='Falta fazer o desafio em casa e marcar “Fiz o desafio!”.';return}
   if(missDone[id]){$('miMsg').textContent='Você já tinha concluído esta missão. Mandou bem de novo!';return}
   missDone[id]={ts:Date.now(),score:right};save('mt_missions',missDone);

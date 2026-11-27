@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="CasuloPlay">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127163835">
+<meta name="mt-build" content="20261127164349">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -238,6 +238,8 @@ header h1{margin-right:auto;order:1}
   <input id="cPin" type="password" inputmode="numeric" autocomplete="off" placeholder="Deixe em branco para manter o atual">
   <p class="hint">Para trocar, digite um novo PIN de 4 a 8 números.</p>
   <div class="row"><button class="pri" id="cSave">Salvar</button><button id="cX">Fechar</button></div>
+  <label>O que ele aprendeu nas missões</label>
+  <div class="hist" id="cRef"></div>
   <label>Histórico</label>
   <div class="hist" id="cHist"></div>
   <div class="row"><button id="cHistClr">Limpar histórico</button></div>
@@ -564,7 +566,8 @@ function missionsView(){
   $('grid').className='';const n=Object.keys(missDone).length;
   const av=MISSIONS.filter(m=>missVideo(m)),lock=MISSIONS.filter(m=>!missVideo(m));
   $('grid').innerHTML=`<div style="grid-column:1/-1"><div class="sec"><h3>Missões</h3><small class="hint">${n} concluídas</small></div>
-  ${av.length?`<p class="hint" style="padding:0 max(4vw,14px);margin:0 0 12px">Assista, responda 3 perguntas e faça o desafio. Ganhe medalhas, pontos e minutos bônus.</p>
+  <div class="ms"><button id="qzOpen" style="outline:2px solid var(--acc)"><i class="ti ti-bolt"></i><span><b>Quiz relâmpago</b><small>10 perguntas em 60 segundos</small></span></button></div>
+  ${av.length?`<p class="hint" style="padding:0 max(4vw,14px);margin:0 0 12px">Assista, conte o que aprendeu e faça o desafio. Ganhe medalhas, pontos e minutos bônus.</p>
   <div class="ms">${av.map(m=>`<button data-mi="${m.id}" class="${missDone[m.id]?'ok':''}"><i class="ti ti-${m.ico}"></i><span><b>${esc(m.t)}</b><small>${missDone[m.id]?'Concluída':esc(m.sub)}</small></span></button>`).join('')}</div>`
   :`<p class="hint" style="padding:0 max(4vw,14px)">Nenhuma missão liberada ainda. As missões aparecem quando há vídeos sobre o tema nos canais de aprendizado aprovados.</p>`}
   ${lock.length?`<div class="sec"><h3 style="font-size:16px;color:var(--mut)">Bloqueadas</h3></div>
@@ -578,27 +581,75 @@ function missionView(id){
    <button id="miBack" style="margin:14px 0 4px;background:none;padding:0;color:var(--mut)"><i class="ti ti-arrow-left"></i> Missões</button>
    <h2 style="margin:4px 0 4px;font-size:28px"><i class="ti ti-${m.ico}" style="color:var(--acc)"></i> ${esc(m.t)}</h2>
    <h4>1. Assista um vídeo sobre o tema</h4><div style="max-width:360px">${card(v)}</div>
-   <h4>2. Responda sobre o tema</h4><p class="hint" style="margin-top:-4px">As perguntas são sobre o assunto em geral. Nem sempre a resposta está no vídeo: use o que você já sabe ou pesquise.</p>${m.q.map((q,qi)=>`<div class="qz" data-q="${qi}"><p>${esc(q[0])}</p>${q[1].map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}">${esc(o)}</label>`).join('')}</div>`).join('')}
+   <h4>2. Conte o que aprendeu</h4>
+   <div class="qz"><p>Qual foi a coisa mais interessante do vídeo?</p><textarea id="mr1" maxlength="400" placeholder="Escreva aqui…" style="width:100%;min-height:80px;font:inherit;font-size:16px;padding:10px;border-radius:10px;border:1px solid #33496b;background:#0f1b2d;color:var(--ink)"></textarea></div>
+   <div class="qz"><p>Explique em uma frase, como se fosse para um amigo.</p><textarea id="mr2" maxlength="400" placeholder="Escreva aqui…" style="width:100%;min-height:80px;font:inherit;font-size:16px;padding:10px;border-radius:10px;border:1px solid #33496b;background:#0f1b2d;color:var(--ink)"></textarea></div>
    <h4>3. Desafio em casa</h4><div class="dc"><p style="margin:0 0 10px">${esc(m.d)}</p><label class="chk" style="margin:0"><input type="checkbox" id="miDone"> Fiz o desafio!</label></div>
    <p class="hint" id="miMsg"></p>
    <div class="row"><button class="pri" id="miOk" data-id="${m.id}">${missDone[m.id]?'Missão já concluída':'Concluir missão'}</button></div></div>`;
 }
 function missionDone(id){
-  const m=MISSIONS.find(x=>x.id===id);let right=0,all=true;
-  m.q.forEach((q,qi)=>{const sel=document.querySelector(`input[name=q${qi}]:checked`);const box=document.querySelector(`.qz[data-q="${qi}"]`);
-    box.querySelectorAll('label').forEach(l=>l.classList.remove('right','wrong'));
-    if(!sel){all=false;return}const ok2=+sel.value===q[2];if(ok2)right++;sel.closest('label').classList.add(ok2?'right':'wrong')});
-  const vv=missVideo(m);if(vv&&!done.some(x=>x.id===vv.id)&&!(prog[vv.id]&&prog[vv.id].d&&prog[vv.id].t>=prog[vv.id].d*0.9)){$('miMsg').textContent='Primeiro assista ao vídeo até o fim.';return}
-  if(!all){$('miMsg').textContent='Responda as 3 perguntas.';return}
-  if(right<2){$('miMsg').textContent='Você acertou '+right+' de 3. Tente de novo!';return}
+  const m=MISSIONS.find(x=>x.id===id);const vv=missVideo(m);
+  if(vv&&!done.some(x=>x.id===vv.id)&&!(prog[vv.id]&&prog[vv.id].d&&prog[vv.id].t>=prog[vv.id].d*0.9)){$('miMsg').textContent='Primeiro assista ao vídeo até o fim.';return}
+  const r1=$('mr1').value.trim(),r2=$('mr2').value.trim();
+  if(r1.length<10||r2.length<10){$('miMsg').textContent='Escreva um pouco mais nas duas respostas.';return}
   if(!$('miDone').checked){$('miMsg').textContent='Falta fazer o desafio em casa e marcar “Fiz o desafio!”.';return}
   if(missDone[id]){$('miMsg').textContent='Você já tinha concluído esta missão. Mandou bem de novo!';return}
-  missDone[id]={ts:Date.now(),score:right};save('mt_missions',missDone);
-  let msg='Missão concluída! '+right+'/3 acertos.';
+  missDone[id]={ts:Date.now(),r1,r2,v:vv?vv.title:''};save('mt_missions',missDone);
+  let msg='Missão concluída!';
   if(lim()&&(used.b||0)<30){usedNow();used.b=(used.b||0)+5;save('mt_used',used);msg+=' +5 min de bônus!';showLeft()}
   toast(msg,'target-arrow');checkMedals();missionsView();
 }
+const QZ=[...MISSIONS.flatMap(m=>m.q),
+ ['Qual é o maior oceano da Terra?',['Atlântico','Pacífico','Índico'],1],
+ ['Qual é a capital do Brasil?',['Rio de Janeiro','São Paulo','Brasília'],2],
+ ['Qual gás as plantas retiram do ar na fotossíntese?',['Gás carbônico','Oxigênio','Hélio'],0],
+ ['A que temperatura a água ferve ao nível do mar?',['50 °C','100 °C','200 °C'],1],
+ ['Quantos lados tem um hexágono?',['5','6','8'],1],
+ ['Qual é o maior animal do mundo?',['Elefante-africano','Tubarão-baleia','Baleia-azul'],2],
+ ['Qual planeta é chamado de planeta vermelho?',['Marte','Vênus','Mercúrio'],0],
+ ['Quanto é 7 × 8?',['54','56','64'],1],
+ ['Quem pintou a Mona Lisa?',['Van Gogh','Leonardo da Vinci','Picasso'],1],
+ ['Em que ano o Brasil declarou a independência?',['1500','1822','1889'],1],
+ ['Gelo é água em qual estado físico?',['Sólido','Líquido','Gasoso'],0],
+ ['Quantos minutos tem uma hora e meia?',['80','90','150'],1],
+ ['Como se diz “olá” em inglês?',['Hello','Goodbye','Thanks'],0],
+ ['Qual é o maior país da América do Sul?',['Argentina','Brasil','Peru'],1]];
+let qzS=null,qzT=null;
+function quizView(){
+  const best=load('mt_qzbest',0);
+  $('grid').className='';
+  $('grid').innerHTML=`<div style="grid-column:1/-1" class="mi"><button id="miBack" style="margin:14px 0 4px;background:none;padding:0;color:var(--mut)"><i class="ti ti-arrow-left"></i> Missões</button>
+   <h2 style="margin:4px 0 6px;font-size:28px"><i class="ti ti-bolt" style="color:var(--acc)"></i> Quiz relâmpago</h2>
+   <p class="hint">10 perguntas de conhecimentos gerais em 60 segundos. Seu recorde: <b>${best}</b> acertos.</p>
+   <div class="row"><button class="pri" id="qzGo">Começar</button></div></div>`;
+}
+function quizStart(){
+  const pool=QZ.slice().sort(()=>Math.random()-.5).slice(0,10);qzS={pool,i:0,ok:0,end:Date.now()+60000};
+  clearInterval(qzT);qzT=setInterval(()=>{if(!qzS)return clearInterval(qzT);const l=Math.max(0,Math.ceil((qzS.end-Date.now())/1000));const e=$('qzTime');if(e)e.textContent=l+' s';if(l<=0)quizEnd()},250);quizQ();
+}
+function quizQ(){
+  const q=qzS.pool[qzS.i];
+  $('grid').innerHTML=`<div style="grid-column:1/-1" class="mi"><div style="display:flex;justify-content:space-between;margin:16px 0 8px;font-weight:700"><span>Pergunta ${qzS.i+1}/10</span><span id="qzTime" style="color:var(--acc)">60 s</span></div>
+   <div class="qz"><p style="font-size:20px">${esc(q[0])}</p>${q[1].map((o,oi)=>`<button data-qa="${oi}" style="display:block;width:100%;text-align:left;margin-bottom:8px">${esc(o)}</button>`).join('')}</div></div>`;
+}
+function quizAns(oi,btn){
+  const q=qzS.pool[qzS.i];const ok2=oi===q[2];if(ok2)qzS.ok++;
+  btn.style.background=ok2?'#2f6f4f':'#7a2a2a';
+  setTimeout(()=>{if(!qzS)return;qzS.i++;if(qzS.i>=10)quizEnd();else quizQ()},350);
+}
+function quizEnd(){
+  if(!qzS)return;clearInterval(qzT);const n=qzS.ok;qzS=null;
+  const best=load('mt_qzbest',0);if(n>best)save('mt_qzbest',n);
+  const day=today(),qx=load('mt_qzxp',{d:'',x:0});if(qx.d!==day){qx.d=day;qx.x=0}
+  const gain=Math.min(n*2,30-qx.x);if(gain>0){qx.x+=gain;save('mt_qzxp',qx);addXp(gain)}
+  $('grid').innerHTML=`<div style="grid-column:1/-1" class="mi"><h2 style="margin:20px 0 6px;font-size:28px">${n>best?'Novo recorde! ':''}${n} de 10</h2>
+   <p class="hint">${gain>0?'+'+gain+' pontos de XP.':'Você já ganhou os pontos de quiz de hoje. Jogue para treinar!'}</p>
+   <div class="row"><button class="pri" id="qzGo">Jogar de novo</button><button id="miBack">Voltar às missões</button></div></div>`;
+}
 function renderHist(){
+  const rf=Object.entries(missDone).sort((a,b)=>b[1].ts-a[1].ts);
+  $('cRef').innerHTML=rf.length?rf.map(([id,r])=>{const m=MISSIONS.find(x=>x.id===id)||{t:id};return `<div><b>${esc(m.t)}</b>${r.r1?`<small>Mais interessante: ${esc(r.r1)}</small><small>Para um amigo: ${esc(r.r2)}</small>`:''}<small>${new Date(r.ts).toLocaleDateString('pt-BR')}</small></div>`}).join(''):'<p class="hint">Nenhuma missão concluída ainda.</p>';
   const fmtT=ts=>new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
   $('cHist').innerHTML=hist.length?hist.slice(0,80).map(h=>`<div><a href="https://www.youtube.com/watch?v=${esc(h.id)}" target="_blank" rel="noopener" style="color:var(--ink)">${esc(h.t)}</a><small>${esc(h.c)} · ${fmtT(h.ts)}</small></div>`).join(''):'<p class="hint">Nada assistido ainda.</p>';
   $('cUsed').textContent='Assistido hoje: '+Math.round(usedNow()/60)+' min · Missões concluídas: '+Object.keys(missDone).length+' de '+MISSIONS.length;
@@ -687,7 +738,10 @@ $('grid').addEventListener('click',e=>{const c=e.target.closest('#swC button');i
 applyTheme();checkMedals();
 if(SERVER)$('cKeyH').textContent='Opcional. Deixe em branco para usar o servidor do app.';
 $('grid').addEventListener('click',e=>{const b=e.target.closest('[data-mi]');if(b){missionView(b.dataset.mi);scrollTo(0,0);return}
-  if(e.target.closest('#miBack')){missionsView();scrollTo(0,0);return}
+  if(e.target.closest('#miBack')){qzS=null;clearInterval(qzT);missionsView();scrollTo(0,0);return}
+  if(e.target.closest('#qzOpen')){quizView();scrollTo(0,0);return}
+  if(e.target.closest('#qzGo')){quizStart();return}
+  const qa=e.target.closest('[data-qa]');if(qa&&qzS){quizAns(+qa.dataset.qa,qa);return}
   const o=e.target.closest('#miOk');if(o)missionDone(o.dataset.id)});
 $('bPais').onclick=askPin;$('lockP').onclick=askPin;
 $('cHistClr').onclick=()=>{hist=[];save('mt_hist',hist);renderHist()};

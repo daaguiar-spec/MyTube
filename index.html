@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="CasuloPlay">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127180719">
+<meta name="mt-build" content="20261127181102">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -918,11 +918,11 @@ async function findCh(){
       const vv=await yt('videos',{part:'snippet,localizations',id:vids.join(',')});
       if(vv.items.some(v=>Object.keys(v.localizations||{}).some(k=>k.toLowerCase().startsWith('pt'))||String(v.snippet.defaultAudioLanguage||'').toLowerCase().startsWith('pt')))dub.add(ch.id);
     }catch(e){}}));
-    c.items=c.items.filter(ch=>isPt(ch)||dub.has(ch.id));
-    const list=c.items.sort((a,b)=>(kid(b)-kid(a))||((+b.statistics.subscriberCount||0)-(+a.statistics.subscriberCount||0)));
-    $('fMsg').textContent=list.length?list.length+' canais em português. Confira antes de adicionar.':'Nenhum canal em português encontrado. Tente outras palavras.';
+    const lvl=ch=>isPt(ch)?2:dub.has(ch.id)?1:0;
+    const list=c.items.sort((a,b)=>(lvl(b)-lvl(a))||(kid(b)-kid(a))||((+b.statistics.subscriberCount||0)-(+a.statistics.subscriberCount||0)));
+    $('fMsg').textContent=list.length?list.length+' canais (os em português aparecem primeiro). Confira antes de adicionar.':'Nenhum canal encontrado. Tente outras palavras.';
     $('fRes').innerHTML=list.map(ch=>{const h=ch.snippet.customUrl||ch.id;const done=have.includes(h.toLowerCase());
-      return `<div class="ch"><img loading="lazy" src="${esc((ch.snippet.thumbnails.default||{}).url)}" alt=""><div><strong>${esc(ch.snippet.title)}</strong>${kid(ch)?'<span style="display:inline-block;background:#2f6f4f;color:#fff;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;margin:2px 4px 2px 0">Feito para crianças</span>':''}${dub.has(ch.id)?'<span style="display:inline-block;background:#1f4f8a;color:#fff;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;margin:2px 0">Estrangeiro, com versão em português</span>':''}<small>${fmt(ch.statistics.subscriberCount)} inscritos · ${esc(ch.snippet.description)}</small><a href="https://www.youtube.com/channel/${esc(ch.id)}" target="_blank" rel="noopener" style="color:var(--acc);font-size:14px">Ver canal</a></div><button data-h="${esc(h)}" class="${done?'added':''}">${done?'Adicionado':'Adicionar'}</button></div>`}).join('');
+      return `<div class="ch"><img loading="lazy" src="${esc((ch.snippet.thumbnails.default||{}).url)}" alt=""><div><strong>${esc(ch.snippet.title)}</strong>${kid(ch)?'<span style="display:inline-block;background:#2f6f4f;color:#fff;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;margin:2px 4px 2px 0">Feito para crianças</span>':''}${!isPt(ch)&&!dub.has(ch.id)?'<span style="display:inline-block;background:#5a3b1f;color:#fff;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;margin:2px 0">Estrangeiro, sem versão em português</span>':''}${dub.has(ch.id)?'<span style="display:inline-block;background:#1f4f8a;color:#fff;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;margin:2px 0">Estrangeiro, com versão em português</span>':''}<small>${fmt(ch.statistics.subscriberCount)} inscritos · ${esc(ch.snippet.description)}</small><a href="https://www.youtube.com/channel/${esc(ch.id)}" target="_blank" rel="noopener" style="color:var(--acc);font-size:14px">Ver canal</a></div><button data-h="${esc(h)}" class="${done?'added':''}">${done?'Adicionado':'Adicionar'}</button></div>`}).join('');
   }catch(e){$('fMsg').textContent='Erro: '+e.message}
 }
 $('fRes').addEventListener('click',e=>{

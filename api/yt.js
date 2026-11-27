@@ -3,7 +3,7 @@
 const RULES = {
   channels:      { params: ['part', 'id', 'forHandle'], ttl: 7 * 86400 },
   playlistItems: { params: ['part', 'playlistId', 'maxResults'], ttl: 3600 },
-  videos:        { params: ['part', 'id'], ttl: 30 * 86400 },
+  videos:        { params: ['part', 'id', 'hl'], ttl: 7 * 86400 },
   search:        { params: ['part', 'q', 'type', 'safeSearch', 'maxResults', 'regionCode', 'relevanceLanguage', 'videoEmbeddable'], ttl: 7 * 86400 }
 };
 const ALLOWED_HOSTS = (process.env.ALLOWED_HOSTS || '').split(',').map(s => s.trim()).filter(Boolean);

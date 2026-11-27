@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="CasuloPlay">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127181102">
+<meta name="mt-build" content="20261127181502">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -232,6 +232,8 @@ header h1{margin-right:auto;order:1}
   <label for="cLim">Limite de tempo por dia</label>
   <select id="cLim"><option value="0">Sem limite</option><option value="30">30 minutos</option><option value="60">1 hora</option><option value="90">1h30</option><option value="120">2 horas</option><option value="180">3 horas</option></select>
   <p class="hint" id="cUsed"></p>
+  <label class="chk"><input type="checkbox" id="cPt"> Esconder vídeos estrangeiros sem versão em português</label>
+  <p class="hint">Vídeos estrangeiros com título traduzido continuam aparecendo, já em português e com legenda em português ligada.</p>
   <label class="chk"><input type="checkbox" id="cOpen"> Permitir busca em todo o YouTube (SafeSearch estrito)</label>
   <p class="hint">Desligado: a busca só procura nos canais aprovados.</p>
   <label for="cPin">PIN dos pais</label>
@@ -261,7 +263,7 @@ let cfg=load('mt_cfg',{pin:'',key:'',open:false,
   words:'+18, nsfw, terror, assustador, sangue, gore, sexy, aposta, apostas, bet, cassino, tigrinho, briga',
   bch:''});
 let missVid=load('mt_missvid',{});
-let nm=load('mt_nm',{}), chc=load('mt_ch',{}), feed=load('mt_feed3',{}), hist=load('mt_hist',[]);
+let nm=load('mt_nm',{}), chc=load('mt_ch',{}), feed=load('mt_feed4',{}), hist=load('mt_hist',[]);
 const today=()=>new Date().toLocaleDateString('sv');
 let used=load('mt_used',{d:today(),s:0});
 const minD=()=>+(cfg.minDur??181), maxD=()=>+(cfg.maxDur??0), lim=()=>+(cfg.limit??0);
@@ -270,9 +272,14 @@ const iso=d=>{const m=String(d||'').match(/P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(
 async function addDur(list){
   const need=list.filter(v=>v.dur==null).map(v=>v.id);
   for(let i=0;i<need.length;i+=50){
-    try{const j=await yt('videos',{part:'contentDetails',id:need.slice(i,i+50).sort().join(',')});
-      const mp={};j.items.forEach(x=>mp[x.id]=iso(x.contentDetails.duration));
-      list.forEach(v=>{if(mp[v.id]!=null)v.dur=mp[v.id]});}catch(e){}
+    try{const j=await yt('videos',{part:'contentDetails,snippet,localizations',id:need.slice(i,i+50).sort().join(','),hl:'pt-BR'});
+      const mp={};j.items.forEach(x=>mp[x.id]=x);
+      list.forEach(v=>{const x=mp[v.id];if(!x)return;v.dur=iso(x.contentDetails.duration);
+        const sn=x.snippet||{},al=String(sn.defaultAudioLanguage||sn.defaultLanguage||'').toLowerCase();
+        const loc=Object.keys(x.localizations||{}).some(k=>k.toLowerCase().startsWith('pt'));
+        v.lang=al;v.ptNative=al.startsWith('pt');v.ptVer=v.ptNative||loc;
+        if(sn.localized&&sn.localized.title&&loc)v.title=sn.localized.title;
+        if(sn.localized&&sn.localized.description&&loc)v.desc=sn.localized.description;});}catch(e){}
   }
   return list;
 }
@@ -284,6 +291,7 @@ const cats=()=>cfg.cats.split('\n').map(l=>{const i=l.indexOf(':');if(i<0)return
 const msg=t=>$('msg').textContent=t||'';
 
 function ok(v){
+  if(cfg.ptOnly&&v.lang&&v.ptVer===false)return false;
   if(v.dur!=null){if(minD()&&v.dur<minD())return false;if(maxD()&&v.dur>maxD()*60)return false}
   if(cfg.bch.split(/[\s,]+/).includes(v.chId))return false;
   const t=norm(v.title+' '+v.desc);
@@ -327,7 +335,7 @@ async function loadCat(c,force){
   }));
   all.sort((a,b)=>b.date.localeCompare(a.date));
   await addDur(all);
-  feed[c.name]={t:Date.now(),v:all};save('mt_feed3',feed);
+  feed[c.name]={t:Date.now(),v:all};save('mt_feed4',feed);
   if(errs.length)msg(errs.join(' · '));
   return all;
 }
@@ -516,14 +524,16 @@ function hello(){appName();try{const l=lvInfo();$('helloLv').innerHTML=`<span cl
 }
 function tbar(){hello();const on=!!lim()&&cur>=-1;$('tbar').style.display=on?'block':'none';if(!on)return;const left=Math.max(0,capS()-usedNow());$('tbarT').textContent=Math.ceil(left/60)+' min restantes';$('tbarF').style.width=Math.round(left/capS()*100)+'%'}
 function showLeft(){tbar();$('left').textContent=lim()?'Tempo restante hoje: '+Math.max(0,Math.ceil((capS()-usedNow())/60))+' min'+(bonus()?' (inclui '+bonus()+' min de bônus por aprender)':''):''}
+let curForeign=false;
 function play(id,title,chId,chName){
+  {const vv=allVids().get(id);curForeign=!!(vv&&vv.lang&&!vv.ptNative)}
   if(timeUp()){showLock();return}
   playing={id,chId};
   hist.unshift({id,t:title,c:chName||'',k:catOf(id),ts:Date.now()});hist=hist.slice(0,300);save('mt_hist',hist);showLeft();
   const st=prog[id]&&prog[id].d&&prog[id].t<prog[id].d-20?Math.floor(prog[id].t):0;
   if(window.YT&&YT.Player){$('frame').innerHTML='<div id="ytp"></div>';
-    try{ytp=new YT.Player('ytp',{host:'https://www.youtube-nocookie.com',videoId:id,playerVars:{rel:0,modestbranding:1,autoplay:1,iv_load_policy:3,playsinline:1,start:st}})}catch(e){ytp=null}}
-  else{ytp=null;$('frame').innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?rel=0&modestbranding=1&autoplay=1&iv_load_policy=3&playsinline=1&start=${st}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`}
+    try{ytp=new YT.Player('ytp',{host:'https://www.youtube-nocookie.com',videoId:id,playerVars:{hl:'pt-BR',cc_lang_pref:'pt',...(curForeign?{cc_load_policy:1}:{}),rel:0,modestbranding:1,autoplay:1,iv_load_policy:3,playsinline:1,start:st}})}catch(e){ytp=null}}
+  else{ytp=null;$('frame').innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?hl=pt-BR&cc_lang_pref=pt${curForeign?'&cc_load_policy=1':''}&rel=0&modestbranding=1&autoplay=1&iv_load_policy=3&playsinline=1&start=${st}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`}
   $('pt').textContent=title;$('bBloq').style.display=parent?'':'none';
   const v=allVids().get(id)||{id,title,chId,ch:chName};
   const dt=v.date?new Date(v.date).toLocaleDateString('pt-BR'):'';
@@ -688,7 +698,7 @@ function renderHist(){
 }
 function openCfg(){
   $('cMin').value=String(minD());$('cMax').value=String(maxD());$('cLim').value=String(lim());renderHist();
-  $('cKey').value=cfg.key;$('cCats').value=cfg.cats;$('cWords').value=cfg.words;$('cBch').value=cfg.bch;$('cOpen').checked=cfg.open;$('cPin').value='';$('cName').value=cfg.kidName||'';$('cApp').value=cfg.appName||'';$('cAva').value='';try{$('cAvaPrev').src=localStorage.getItem('mt_avatar')||''}catch(e){}
+  $('cKey').value=cfg.key;$('cCats').value=cfg.cats;$('cWords').value=cfg.words;$('cBch').value=cfg.bch;$('cOpen').checked=cfg.open;$('cPt').checked=!!cfg.ptOnly;$('cPin').value='';$('cName').value=cfg.kidName||'';$('cApp').value=cfg.appName||'';$('cAva').value='';try{$('cAvaPrev').src=localStorage.getItem('mt_avatar')||''}catch(e){}
   $('cfg').classList.add('show');refreshCats();
 }
 const validPin=p=>/^\d{4,8}$/.test(p);
@@ -744,7 +754,7 @@ window.mtApi={
   apply:d=>{if(!d||!d.cfg)return;const oldCats=cfg.cats;
     cfg={...cfg,...d.cfg};save('mt_cfg',cfg);save('mt_cfg_ts',d.updatedAt||Date.now());
     try{if(d.avatar)localStorage.setItem('mt_avatar',d.avatar);else localStorage.removeItem('mt_avatar')}catch(e){}
-    if(oldCats!==cfg.cats){feed={};save('mt_feed3',feed)}
+    if(oldCats!==cfg.cats){feed={};save('mt_feed4',feed)}
     if($('cfg').classList.contains('show'))openCfg();
     if(!document.querySelector('.ov.show'))openCat(cur);else tabs();},
   push:cloudPush,
@@ -797,7 +807,7 @@ $('pinOk').onclick=()=>{
 $('pinIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinOk').click()});$('pinIn2').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinOk').click()});
 $('cX').onclick=()=>{$('cfg').classList.remove('show');parent=false;payCheck()};
 $('cSave').onclick=()=>{
-  cfg={key:$('cKey').value.trim(),cats:$('cCats').value,words:$('cWords').value,bch:$('cBch').value.trim(),open:$('cOpen').checked,pin:(validPin($('cPin').value.trim())?$('cPin').value.trim():cfg.pin),minDur:+$('cMin').value,maxDur:+$('cMax').value,limit:+$('cLim').value,kidName:$('cName').value.trim(),appName:$('cApp').value.trim()};
+  cfg={key:$('cKey').value.trim(),cats:$('cCats').value,words:$('cWords').value,bch:$('cBch').value.trim(),open:$('cOpen').checked,ptOnly:$('cPt').checked,pin:(validPin($('cPin').value.trim())?$('cPin').value.trim():cfg.pin),minDur:+$('cMin').value,maxDur:+$('cMax').value,limit:+$('cLim').value,kidName:$('cName').value.trim(),appName:$('cApp').value.trim()};
   save('mt_cfg',cfg);if(!timeUp())$('lock').classList.remove('show');
   cloudPush();
   $('cfg').classList.remove('show');parent=false;openCat(-1,true);payCheck();
@@ -814,8 +824,8 @@ $('cImp').onclick=()=>{
     t=t.replace(/-/g,'+').replace(/_/g,'/').replace(/[^A-Za-z0-9+\/]/g,'');while(t.length%4)t+='=';
     const bin=atob(t);const c=JSON.parse(new TextDecoder().decode(Uint8Array.from(bin,ch=>ch.charCodeAt(0))));
     if(typeof c.cats!=='string')throw 0;
-    cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,pin:validPin(c.pin||'')?c.pin:cfg.pin,minDur:c.minDur??181,maxDur:c.maxDur??0,limit:c.limit??0,kidName:c.kidName||cfg.kidName||'',appName:c.appName||cfg.appName||''};
-    save('mt_cfg',cfg);feed={};save('mt_feed3',feed);
+    cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,ptOnly:!!c.ptOnly,pin:validPin(c.pin||'')?c.pin:cfg.pin,minDur:c.minDur??181,maxDur:c.maxDur??0,limit:c.limit??0,kidName:c.kidName||cfg.kidName||'',appName:c.appName||cfg.appName||''};
+    save('mt_cfg',cfg);feed={};save('mt_feed4',feed);
     $('cMsg').textContent='Configuração aplicada!';
     openCfg();openCat(-1,true);
   }catch(e){const v=$('cCode').value;$('cMsg').textContent='Código inválido ('+(e&&e.message||'formato')+'; '+v.length+' caracteres; começa com “'+v.trim().slice(0,6)+'”). Confira se copiou tudo, do começo (MT1:) ao fim.'}
@@ -943,7 +953,7 @@ $('fRes').addEventListener('click',e=>{
     ptr.style.transition='none';ptr.style.height=Math.min(dy/2,70)+'px';ptr.textContent=dy>140?'↻ Solte para atualizar':'↓ Puxe para atualizar'},{passive:true});
   addEventListener('touchend',()=>{if(y0==null)return;ptr.style.transition='';
     if(dy>140){ptr.textContent='Atualizando…';ptr.style.height='44px';
-      try{(cur===-1?cats():[cats()[cur]]).forEach(c=>{if(c&&feed[c.name])feed[c.name].t=0});save('mt_feed3',feed)}catch(e){}
+      try{(cur===-1?cats():[cats()[cur]]).forEach(c=>{if(c&&feed[c.name])feed[c.name].t=0});save('mt_feed4',feed)}catch(e){}
       try{sessionStorage.setItem('mt_cur',cur)}catch(e){}setTimeout(()=>location.reload(),150)}
     else ptr.style.height='0';y0=null});
 }

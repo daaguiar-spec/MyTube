@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="CasuloPlay">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261128110426">
+<meta name="mt-build" content="20261128111737">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -97,7 +97,8 @@ body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 .lvchip{display:inline-flex;gap:6px;align-items:center;margin-top:6px;background:#22344f;color:var(--acc);font-weight:700;font-size:13px;padding:3px 10px;border-radius:999px}
 .memg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;max-width:520px}
 .memg button{aspect-ratio:1;min-height:0;padding:4px;border-radius:14px;background:#22344f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:transform .2s}
-.memg button i{font-size:30px;color:#4b5d7a}.memg button small{font-size:11px;line-height:1.1}
+.memg button i{font-size:30px;color:#4b5d7a}.memg button span{font-size:13px;line-height:1.2;font-weight:700;overflow-wrap:anywhere}
+.memg button.s1 span{color:var(--acc)}
 .memg button.up{background:var(--card);outline:2px solid #33496b}.memg button.up i{color:var(--acc)}
 .memg button.ok{outline:2px solid var(--acc)}
 @media(prefers-reduced-motion:reduce){.memg button{transition:none}}
@@ -594,7 +595,7 @@ function missionsView(){
   $('grid').className='';const n=Object.keys(missDone).length;
   const av=MISSIONS.filter(m=>missVideo(m)),lock=MISSIONS.filter(m=>!missVideo(m));
   $('grid').innerHTML=`<div style="grid-column:1/-1"><div class="sec"><h3>Missões</h3><small class="hint">${n} concluídas</small></div>
-  <div class="ms"><button id="qzOpen" style="outline:2px solid var(--acc)"><i class="ti ti-bolt"></i><span><b>Quiz relâmpago</b><small>10 perguntas em 60 segundos</small></span></button><button id="memOpen" style="outline:2px solid var(--acc)"><i class="ti ti-cards"></i><span><b>Memória do espaço</b><small>Ache os pares e aprenda</small></span></button><button id="stOpen" style="outline:2px solid var(--acc)"><i class="ti ti-book"></i><span><b>Histórias de escolha</b><small>Você decide o final</small></span></button></div>
+  <div class="ms"><button id="qzOpen" style="outline:2px solid var(--acc)"><i class="ti ti-bolt"></i><span><b>Quiz relâmpago</b><small>10 perguntas em 60 segundos</small></span></button><button id="memOpen" style="outline:2px solid var(--acc)"><i class="ti ti-cards"></i><span><b>Jogo da memória</b><small>9 temas para aprender</small></span></button><button id="stOpen" style="outline:2px solid var(--acc)"><i class="ti ti-book"></i><span><b>Histórias de escolha</b><small>Você decide o final</small></span></button></div>
   ${av.length?`<p class="hint" style="padding:0 max(4vw,14px);margin:0 0 12px">Assista, conte o que aprendeu e faça o desafio. Ganhe medalhas, pontos e minutos bônus.</p>
   <div class="ms">${av.map(m=>`<button data-mi="${m.id}" class="${missDone[m.id]?'ok':''}"><i class="ti ti-${m.ico}"></i><span><b>${esc(m.t)}</b><small>${missDone[m.id]?'Concluída':esc(m.sub)}</small></span></button>`).join('')}</div>`
   :`<p class="hint" style="padding:0 max(4vw,14px)">Nenhuma missão liberada ainda. As missões aparecem quando há vídeos sobre o tema nos canais de aprendizado aprovados.</p>`}
@@ -652,50 +653,53 @@ function storyNode(id,k){
    ${endHtml}</div>`;
   scrollTo(0,0);
 }
-const MEM=[['sun','Sol','O Sol é uma estrela. A luz dele leva cerca de 8 minutos para chegar à Terra.'],
- ['moon','Lua','A Lua é o único satélite natural da Terra.'],
- ['planet','Saturno','Os anéis de Saturno são feitos de pedaços de gelo e rocha.'],
- ['rocket','Foguete','Para chegar ao espaço, um foguete precisa vencer a gravidade da Terra.'],
- ['star','Estrela','Estrelas são enormes bolas de gás quente que produzem luz e calor.'],
- ['satellite','Satélite','Satélites artificiais ajudam no GPS, na previsão do tempo e nas comunicações.'],
- ['comet','Cometa','Cometas são feitos de gelo e poeira e formam uma cauda quando chegam perto do Sol.'],
- ['telescope','Telescópio','Telescópios ajudam a enxergar objetos muito distantes no céu.']];
+let MEMT=[];fetch('memthemes.json').then(r=>r.json()).then(j=>{MEMT=j}).catch(()=>{});
 let mg=null;
 function memView(){
-  const best=load('mt_membest',0);
+  const best=load('mt_membest2',{});
   $('grid').className='';
-  $('grid').innerHTML=`<div style="grid-column:1/-1" class="mi"><button id="miBack" style="margin:14px 0 4px;background:none;padding:0;color:var(--mut)"><i class="ti ti-arrow-left"></i> Missões</button>
-   <h2 style="margin:4px 0 6px;font-size:28px"><i class="ti ti-cards" style="color:var(--acc)"></i> Memória do espaço</h2>
-   <p class="hint">Encontre os 8 pares. A cada par, você aprende uma curiosidade.${best?' Seu recorde: <b>'+best+' jogadas</b>.':''}</p>
-   <div class="row"><button class="pri" id="memGo">Começar</button></div></div>`;
+  $('grid').innerHTML=`<div style="grid-column:1/-1"><div class="mi"><button id="miBack" style="margin:14px 0 4px;background:none;padding:0;color:var(--mut)"><i class="ti ti-arrow-left"></i> Missões</button>
+   <h2 style="margin:4px 0 6px;font-size:28px"><i class="ti ti-cards" style="color:var(--acc)"></i> Jogo da memória</h2>
+   <p class="hint">Junte cada carta com a que combina com ela, como um país e sua capital. A cada par, você aprende algo novo.</p></div>
+   <div class="ms"><button data-memt="__rand"><i class="ti ti-arrows-shuffle"></i><span><b>Surpresa</b><small>Sorteia um tema</small></span></button>
+   ${MEMT.map(t=>`<button data-memt="${t.id}"><i class="ti ti-${t.ico}"></i><span><b>${esc(t.t)}</b><small>${best[t.id]?'Recorde: '+best[t.id]+' jogadas':'8 pares'}</small></span></button>`).join('')||'<p class="hint">Carregando…</p>'}</div></div>`;
 }
-function memStart(){
-  const cards=MEM.flatMap((m,i)=>[i,i]).sort(()=>Math.random()-.5);
-  mg={cards,open:[],done:new Set(),moves:0,lock:false};memDraw('');
+function memStart(id){
+  if(id==='__rand')id=MEMT[Math.floor(Math.random()*MEMT.length)].id;
+  const th=MEMT.find(x=>x.id===id);if(!th)return;
+  const cards=th.p.flatMap((p,i)=>[[i,0],[i,1]]).sort(()=>Math.random()-.5);
+  mg={th,cards,open:[],done:new Set(),moves:0,lock:false};memDraw('');scrollTo(0,0);
 }
 function memDraw(fact){
+  const th=mg.th;
   $('grid').className='';
-  $('grid').innerHTML=`<div style="grid-column:1/-1" class="mi"><div style="display:flex;justify-content:space-between;margin:14px 0 10px;font-weight:700"><button id="miBack" style="background:none;padding:0;min-height:32px;color:var(--mut)"><i class="ti ti-arrow-left"></i> Sair</button><span>Jogadas: ${mg.moves} · Pares: ${mg.done.size}/8</span></div>
-   <div class="memg">${mg.cards.map((k,i)=>{const up=mg.done.has(k)||mg.open.includes(i);return `<button data-mem="${i}" class="${up?'up':''} ${mg.done.has(k)?'ok':''}" aria-label="${up?esc(MEM[k][1]):'Carta virada'}">${up?`<i class="ti ti-${MEM[k][0]}"></i><small>${esc(MEM[k][1])}</small>`:'<i class="ti ti-question-mark"></i>'}</button>`}).join('')}</div>
+  $('grid').innerHTML=`<div style="grid-column:1/-1" class="mi"><div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 6px;font-weight:700"><button id="memBack" style="background:none;padding:0;min-height:32px;color:var(--mut)"><i class="ti ti-arrow-left"></i> Temas</button><span>Jogadas: ${mg.moves} · Pares: ${mg.done.size}/8</span></div>
+   <h3 style="margin:0 0 10px"><i class="ti ti-${th.ico}" style="color:var(--acc)"></i> ${esc(th.t)}</h3>
+   <div class="memg">${mg.cards.map(([k,side],i)=>{const up=mg.done.has(k)||mg.open.includes(i);const tx=th.p[k][side];
+     return `<button data-mem="${i}" class="${up?'up':''} ${mg.done.has(k)?'ok':''} ${side?'s1':''}" aria-label="${up?esc(tx):'Carta virada'}">${up?`<span>${esc(tx)}</span>`:'<i class="ti ti-question-mark"></i>'}</button>`}).join('')}</div>
    <p class="hint" id="memFact" style="min-height:3em;font-size:15px">${fact}</p></div>`;
 }
 function memFlip(i){
-  if(!mg||mg.lock||mg.open.includes(i)||mg.done.has(mg.cards[i]))return;
+  if(!mg||mg.lock||mg.open.includes(i)||mg.done.has(mg.cards[i][0]))return;
+  const keep=()=>$('memFact')?$('memFact').innerHTML:'';
   mg.open.push(i);
-  if(mg.open.length<2){memDraw($('memFact')?$('memFact').innerHTML:'');return}
+  if(mg.open.length<2){memDraw(keep());return}
   mg.moves++;const [a,b]=mg.open;
-  if(mg.cards[a]===mg.cards[b]){const m=MEM[mg.cards[a]];mg.done.add(mg.cards[a]);mg.open=[];
-    memDraw('<b>'+esc(m[1])+':</b> '+esc(m[2]));if(mg.done.size===8)setTimeout(memEnd,900);return}
-  memDraw($('memFact')?$('memFact').innerHTML:'');mg.lock=true;
-  setTimeout(()=>{if(!mg)return;mg.open=[];mg.lock=false;memDraw($('memFact')?$('memFact').innerHTML:'')},900);
+  if(mg.cards[a][0]===mg.cards[b][0]){const p=mg.th.p[mg.cards[a][0]];mg.done.add(mg.cards[a][0]);mg.open=[];
+    memDraw('<b>'+esc(p[0])+' → '+esc(p[1])+':</b> '+esc(p[2]));if(mg.done.size===8)setTimeout(memEnd,1200);return}
+  memDraw(keep());mg.lock=true;
+  setTimeout(()=>{if(!mg)return;mg.open=[];mg.lock=false;memDraw(keep())},1000);
 }
 function memEnd(){
-  const n=mg.moves;mg=null;const best=load('mt_membest',0),rec=!best||n<best;if(rec)save('mt_membest',n);
+  const th=mg.th,n=mg.moves;mg=null;const best=load('mt_membest2',{}),rec=!best[th.id]||n<best[th.id];if(rec){best[th.id]=n;save('mt_membest2',best)}
   const day=today(),gx=load('mt_memxp',{d:'',x:0});if(gx.d!==day){gx.d=day;gx.x=0}
   const gain=gx.x<30?10:0;if(gain){gx.x+=gain;save('mt_memxp',gx);addXp(gain)}
-  $('grid').innerHTML=`<div style="grid-column:1/-1" class="mi"><h2 style="margin:20px 0 6px;font-size:28px">${rec?'Novo recorde! ':''}Você terminou em ${n} jogadas</h2>
-   <p class="hint">${gain?'+10 pontos de XP.':'Você já ganhou os pontos deste jogo hoje. Jogue para treinar!'}</p>
-   <div class="row"><button class="pri" id="memGo">Jogar de novo</button><button id="miBack">Voltar às missões</button></div></div>`;
+  $('grid').innerHTML=`<div style="grid-column:1/-1" class="mi"><h2 style="margin:20px 0 6px;font-size:26px">${rec?'Novo recorde! ':''}${n} jogadas</h2>
+   <p class="hint">${gain?'+10 pontos de XP.':'Você já ganhou os pontos de memória de hoje. Jogue para treinar!'}</p>
+   <h4 style="margin:18px 0 8px">O que você aprendeu hoje</h4>
+   <div class="hist" style="max-height:none">${th.p.map(p=>`<div><b>${esc(p[0])} → ${esc(p[1])}</b><small>${esc(p[2])}</small></div>`).join('')}</div>
+   <div class="row"><button class="pri" data-memt="${th.id}">Jogar de novo</button><button id="memBack">Outros temas</button></div></div>`;
+  scrollTo(0,0);
 }
 const QZ=[...MISSIONS.flatMap(m=>m.q),
  ['Qual é o maior oceano da Terra?',['Atlântico','Pacífico','Índico'],1],
@@ -841,7 +845,8 @@ if(SERVER)$('cKeyH').textContent='Opcional. Deixe em branco para usar o servidor
 $('grid').addEventListener('click',e=>{const b=e.target.closest('[data-mi]');if(b){missionView(b.dataset.mi);scrollTo(0,0);return}
   if(e.target.closest('#miBack')){mg=null;qzS=null;clearInterval(qzT);missionsView();scrollTo(0,0);return}
   if(e.target.closest('#memOpen')){memView();scrollTo(0,0);return}
-  if(e.target.closest('#memGo')){memStart();return}
+  const mt=e.target.closest('[data-memt]');if(mt){memStart(mt.dataset.memt);return}
+  if(e.target.closest('#memBack')){mg=null;memView();scrollTo(0,0);return}
   const mc=e.target.closest('[data-mem]');if(mc){memFlip(+mc.dataset.mem);return}
   if(e.target.closest('#qzOpen')){quizView();scrollTo(0,0);return}
   if(e.target.closest('#stOpen')||e.target.closest('#stList')){storiesView();scrollTo(0,0);return}

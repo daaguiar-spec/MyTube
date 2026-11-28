@@ -48,7 +48,7 @@ module.exports = async (req, res) => {
   else if (CANCELADA.includes(ev)) status = 'cancelada';
 
   try {
-    await fsReq('POST', '/webhook_logs', fields({ ev, email, status, at: Date.now(), raw: JSON.stringify(b).slice(0, 5000) }));
+    await fsReq('POST', '/webhook_logs', fields({ ev, email, status, at: Date.now() }));
     if (email && status) {
       const data = { status, evento: ev, proximoPagamento: sub.next_payment || null, produto: (b.Product && b.Product.product_name) || null, updatedAt: Date.now() };
       const mask = Object.keys(data).map(f => 'updateMask.fieldPaths=' + f).join('&');

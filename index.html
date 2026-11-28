@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="CasuloPlay">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b1422">
-<meta name="mt-build" content="20261127181945">
+<meta name="mt-build" content="20261128105205">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
@@ -706,9 +706,12 @@ function openCfg(){
   $('cfg').classList.add('show');refreshCats();
 }
 const validPin=p=>/^\d{4,8}$/.test(p);
+const hasPin=()=>!!cfg.pinH||validPin(cfg.pin||'');
+async function pinHash(p){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('casuloplay:pin:'+p));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+async function pinCheck(a){if(cfg.pinH)return (await pinHash(a))===cfg.pinH;if(a&&a===cfg.pin){cfg.pinH=await pinHash(a);delete cfg.pin;save('mt_cfg',cfg);try{cloudPush()}catch(e){}return true}return false}
 function lockInfo(){const l=load('mt_pinlock',{n:0,until:0});return l}
 function askPin(){
-  const creating=!validPin(cfg.pin||'');
+  const creating=!hasPin();
   $('pinT').textContent=creating?'Crie o PIN dos pais':'Área dos pais';
   $('pinH').textContent=creating?'Escolha um PIN de 4 a 8 números. Não conte para seu filho: sem ele, ninguém entra nas configurações.':'Digite o PIN para entrar.';
   $('pinIn2').style.display=creating?'':'none';
@@ -756,7 +759,8 @@ window.mtApi={
   noUser:()=>{subInfo={loaded:true,data:null,user:null};payCheck()},
   local:()=>({...cloudData(),updatedAt:load('mt_cfg_ts',0)}),
   apply:d=>{if(!d||!d.cfg)return;const oldCats=cfg.cats;
-    cfg={...cfg,...d.cfg};save('mt_cfg',cfg);save('mt_cfg_ts',d.updatedAt||Date.now());
+    if(d.cfg.pinH||cfg.pinH){const h=d.cfg.pinH||cfg.pinH;d={...d,cfg:{...d.cfg,pinH:h}};delete d.cfg.pin}
+    cfg={...cfg,...d.cfg};if(cfg.pinH)delete cfg.pin;save('mt_cfg',cfg);save('mt_cfg_ts',d.updatedAt||Date.now());
     try{if(d.avatar)localStorage.setItem('mt_avatar',d.avatar);else localStorage.removeItem('mt_avatar')}catch(e){}
     if(oldCats!==cfg.cats){feed={};save('mt_feed4',feed)}
     if($('cfg').classList.contains('show'))openCfg();
@@ -795,23 +799,26 @@ $('grid').addEventListener('click',e=>{const b=e.target.closest('[data-mi]');if(
 $('bPais').onclick=askPin;$('lockP').onclick=askPin;
 $('cHistClr').onclick=()=>{hist=[];save('mt_hist',hist);renderHist()};
 $('pinX').onclick=()=>{$('pin').classList.remove('show');payCheck()};
-$('pinOk').onclick=()=>{
+$('pinOk').onclick=async()=>{
   const a=$('pinIn').value.trim();
-  if(!validPin(cfg.pin||'')){
+  if(!hasPin()){
     if(!validPin(a)){$('pinErr').textContent='Use de 4 a 8 números.';return}
     if(a!==$('pinIn2').value.trim()){$('pinErr').textContent='Os dois PINs não são iguais.';return}
-    cfg.pin=a;save('mt_cfg',cfg);parent=true;$('pin').classList.remove('show');openCfg();return;
+    cfg.pinH=await pinHash(a);delete cfg.pin;save('mt_cfg',cfg);try{cloudPush()}catch(e){}parent=true;$('pin').classList.remove('show');openCfg();return;
   }
   const l=lockInfo();
   if(l.until>Date.now()){$('pinErr').textContent='Muitas tentativas. Tente de novo em '+Math.ceil((l.until-Date.now())/60000)+' min.';return}
-  if(a===cfg.pin){save('mt_pinlock',{n:0,until:0});parent=true;$('pin').classList.remove('show');openCfg()}
+  if(await pinCheck(a)){save('mt_pinlock',{n:0,until:0});parent=true;$('pin').classList.remove('show');openCfg()}
   else{l.n++;if(l.n>=5){l.until=Date.now()+5*60000;l.n=0}save('mt_pinlock',l);
     $('pinErr').textContent=l.until>Date.now()?'Muitas tentativas. Bloqueado por 5 minutos.':'PIN incorreto.'}
 };
 $('pinIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinOk').click()});$('pinIn2').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinOk').click()});
 $('cX').onclick=()=>{$('cfg').classList.remove('show');parent=false;payCheck()};
-$('cSave').onclick=()=>{
-  cfg={key:$('cKey').value.trim(),cats:$('cCats').value,words:$('cWords').value,bch:$('cBch').value.trim(),open:$('cOpen').checked,ptOnly:$('cPt').checked,pin:(validPin($('cPin').value.trim())?$('cPin').value.trim():cfg.pin),minDur:+$('cMin').value,maxDur:+$('cMax').value,limit:+$('cLim').value,kidName:$('cName').value.trim(),appName:$('cApp').value.trim()};
+$('cSave').onclick=async()=>{
+  const np=$('cPin').value.trim(),nh=validPin(np)?await pinHash(np):null;
+  const oldH=cfg.pinH,oldP=cfg.pin;
+  cfg={key:$('cKey').value.trim(),cats:$('cCats').value,words:$('cWords').value,bch:$('cBch').value.trim(),open:$('cOpen').checked,ptOnly:$('cPt').checked,minDur:+$('cMin').value,maxDur:+$('cMax').value,limit:+$('cLim').value,kidName:$('cName').value.trim(),appName:$('cApp').value.trim()};
+  if(nh)cfg.pinH=nh;else if(oldH)cfg.pinH=oldH;else if(oldP)cfg.pin=oldP;
   save('mt_cfg',cfg);if(!timeUp())$('lock').classList.remove('show');
   cloudPush();
   $('cfg').classList.remove('show');parent=false;openCat(-1,true);payCheck();
@@ -826,9 +833,10 @@ $('cImp').onclick=()=>{
   try{
     let t=$('cCode').value;const k=t.toUpperCase().lastIndexOf('MT1:');if(k>=0)t=t.slice(k+4);
     t=t.replace(/-/g,'+').replace(/_/g,'/').replace(/[^A-Za-z0-9+\/]/g,'');while(t.length%4)t+='=';
-    const bin=atob(t);const c=JSON.parse(new TextDecoder().decode(Uint8Array.from(bin,ch=>ch.charCodeAt(0))));
+    const cfg_old_h=cfg.pinH,cfg_old_p=cfg.pin;const bin=atob(t);const c=JSON.parse(new TextDecoder().decode(Uint8Array.from(bin,ch=>ch.charCodeAt(0))));
     if(typeof c.cats!=='string')throw 0;
-    cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,ptOnly:c.ptOnly!==false,pin:validPin(c.pin||'')?c.pin:cfg.pin,minDur:c.minDur??181,maxDur:c.maxDur??0,limit:c.limit??0,kidName:c.kidName||cfg.kidName||'',appName:c.appName||cfg.appName||''};
+    cfg={key:c.key||'',cats:c.cats,words:c.words||'',bch:c.bch||'',open:!!c.open,ptOnly:c.ptOnly!==false,minDur:c.minDur??181,maxDur:c.maxDur??0,limit:c.limit??0,kidName:c.kidName||cfg.kidName||'',appName:c.appName||cfg.appName||''};
+    {const oh=cfg_old_h,op=cfg_old_p;if(c.pinH)cfg.pinH=c.pinH;else if(validPin(c.pin||''))cfg.pin=c.pin;else if(oh)cfg.pinH=oh;else if(op)cfg.pin=op}
     save('mt_cfg',cfg);feed={};save('mt_feed4',feed);
     $('cMsg').textContent='Configuração aplicada!';
     openCfg();openCat(-1,true);
